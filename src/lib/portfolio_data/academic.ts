@@ -6,6 +6,7 @@ type Publication = {
   link: string
 	doi: string
   year: number
+	asset: string
 }
 
 export const PUBLICATIONS : Publication[] = []
