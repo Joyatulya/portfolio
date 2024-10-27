@@ -1,11 +1,24 @@
 <script lang="ts">
 	import AcademicComponent from './AcademicComponent.svelte';
+	import ContactMe from './ContactMe.svelte';
 	import GithubRepoComponent from './GithubRepoComponent.svelte';
+	import Skills from './Skills.svelte';
 </script>
 
 <main>
+	<section class="h-screen lg:max-h-[800px]">
+		<div></div>
+		<div>
+			<p class="font-serif fon">
+				On a quest to understand both carbon & silicon
+				based life.
+			</p>
+		</div>
+	</section>
+	<Skills />
 	<AcademicComponent />
 	<GithubRepoComponent />
+	<ContactMe />
 </main>
 
 <style>

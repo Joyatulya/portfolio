@@ -18,7 +18,6 @@ type TGITHUB_REPO = {
 
 //TODO: Mention about the random games that you have also made
 //TODO: The description and highlight should be written in a better way
-//TODO: That logbook thing that I made, joyfulmeds as well.
 export const GITHUB_REPOS: TGITHUB_REPO[] = [
 	{
 		name: 'Reserach Code',
@@ -51,5 +50,15 @@ export const GITHUB_REPOS: TGITHUB_REPO[] = [
 		name: 'Web Crawler',
 		url : 'na',
 		description: 'Made a web crawler to get data from a website to make my own natural language processing model.'
-	}
+	},
+	{
+		name: 'Logbook App',
+		url : 'na',
+		description: 'An app to help trainees track their progress for their portfolio.'
+	},
+	{
+		name: 'JoyfulMeds',
+		url : 'na',
+		description: 'App for steroid misuse'
+	},
 ]
