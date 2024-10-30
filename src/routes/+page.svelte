@@ -1,22 +1,22 @@
 <script lang="ts">
-	import AcademicComponent from './AcademicComponent.svelte';
+	import { PUBLICATIONS } from '$lib/portfolio_data/academic';
 	import ContactMe from './ContactMe.svelte';
 	import GithubRepoComponent from './GithubRepoComponent.svelte';
 	import Skills from './Skills.svelte';
+	import AcademicCard from './academics/AcademicCard.svelte';
 </script>
 
 <main>
 	<section class="h-screen lg:max-h-[800px]">
 		<div></div>
 		<div>
-			<p class="font-serif fon">
-				On a quest to understand both carbon & silicon
-				based life.
-			</p>
+			<p class="fon font-serif">On a quest to understand both carbon & silicon based life.</p>
 		</div>
 	</section>
 	<Skills />
-	<AcademicComponent />
+	{#each PUBLICATIONS as pub}
+		<AcademicCard {pub} />
+	{/each}
 	<GithubRepoComponent />
 	<ContactMe />
 </main>
@@ -42,15 +42,15 @@
 		filter: blur(60px);
 	}
 	/* Float Animation */
-@keyframes float {
-    0% {
-        transform: translate(-50vw, -50vh) translateY(0);
-    }
-    50% {
-        transform: translate(-50%, -50%) translateY(-30px);
-    }
-    100% {
-        transform: translate(+30vw, +30vh) translateY(0);
-    }
-}
+	@keyframes float {
+		0% {
+			transform: translate(-50vw, -50vh) translateY(0);
+		}
+		50% {
+			transform: translate(-50%, -50%) translateY(-30px);
+		}
+		100% {
+			transform: translate(+30vw, +30vh) translateY(0);
+		}
+	}
 </style>

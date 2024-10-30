@@ -1,6 +1,6 @@
 type Publication_Type = 'Original Article' | 'QI/Audit' | 'Case Report' | 'Poster' | 'Presentation'
 
-type Publication = {
+export type Publication = {
 	name: string
 	type: Publication_Type[]
 	link: string
@@ -41,7 +41,7 @@ export const PUBLICATIONS: Publication[] = [
 		link: 'https://clinicalnutritionespen.com/article/S2405-4577(23)02356-2/abstract',
 		doi: 'https://doi.org/10.1016/j.clnesp.2023.12.131',
 		year: 2024,
-		published_place: ['BAPEN annual conference, Edinburgh, UK', 'Clinical Nutrition ESPEN']
+		published_place: ['BAPEN (British Association for Parenteral and Enteral Nutrition) annual conference, Edinburgh, UK', 'Clinical Nutrition ESPEN']
 	},
 	{
 		name: 'Revisiting Post-thrombolysis ICH. How are we doing Post Covid? A retrospective Audit',
@@ -80,18 +80,18 @@ export const PUBLICATIONS: Publication[] = [
 		published_place: 'International Forum on Quality and Safety in Healthcare, London, UK'
 	},
 	{
-		name: 'Active Case Finding (ACF) & Direct Benefit Transfer (DBT) Campaigns',
+		name: 'Active Case Finding & Direct Benefit Transfer Campaigns',
 		type: [ 'Presentation' ],
 		link: '/academic/ACF PPT 2021.pdf',
 		year: 2021,
-		published_place: 'Regional NTEP Campaign, Ambala, India'
+		published_place: 'Regional NTEP (National Tuberculosis Elimination Program)  Campaign, Ambala, India'
 	},
 	{
 		name: 'Differences between Practices of Private and Public Sector in Managing TB',
 		type: [ 'Presentation' ],
 		link: '/academic/Regional Presentation on Private TB.pdf',
 		year: 2022,
-		published_place: '76th NATCON, Mullana, India'
+		published_place: '76th National Association of Tuberculosis & Respiratory Disease Conference (NATCON), Mullana, India'
 	},
 	/* {
 		name: 'Marantic Endocarditis',
