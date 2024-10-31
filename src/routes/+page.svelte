@@ -1,56 +1,44 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
 	import { PUBLICATIONS } from '$lib/portfolio_data/academic';
+	import { ArrowRight } from 'lucide-svelte';
 	import ContactMe from './ContactMe.svelte';
 	import GithubRepoComponent from './GithubRepoComponent.svelte';
 	import Skills from './Skills.svelte';
 	import AcademicCard from './academics/AcademicCard.svelte';
+	import { slide } from 'svelte/transition';
+	const jobs = ['Doctor', 'Software Engineer', 'Data Scientist'];
+	let job_id = $state(0);
+	$effect(() => {
+		let interval = setInterval(() => {
+			job_id = (job_id + 1) % jobs.length;
+		}, 2500);
+		return () => clearInterval(interval);
+	});
 </script>
 
-<main>
+<main class="space-y-8 p-4">
 	<section class="h-screen lg:max-h-[800px]">
-		<div></div>
-		<div>
-			<p class="fon font-serif">On a quest to understand both carbon & silicon based life.</p>
+		<h1 class="h1 my-4">
+			Hello I am a
+			{#key job_id}
+				<span in:slide out:slide class="block">{jobs[job_id]}</span>
+			{/key}
+		</h1>
+		<p class=" font-serif">On a quest to understand both carbon & silicon based life.</p>
+		<div class="p-8">
+			<img src="/assets/portrait.png" alt="Me, Joy Singhal" />
 		</div>
 	</section>
 	<Skills />
-	{#each PUBLICATIONS as pub}
-		<AcademicCard {pub} />
-	{/each}
+	<div class="space-y-6">
+		<h2 class="h2 text-center">Academic Projects</h2>
+		<div class="space-y-4">
+			{#each PUBLICATIONS.slice(0, 3) as pub}
+				<AcademicCard {pub} />
+			{/each}
+		</div>
+		<Button href="/academics" class="w-full">See all Projects <ArrowRight /></Button>
+	</div>
 	<GithubRepoComponent />
-	<ContactMe />
 </main>
-
-<style>
-	#orb {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 150px;
-		height: 150px;
-		background: radial-gradient(
-			circle,
-			rgba(255, 255, 255, 1) 0%,
-			rgba(0, 123, 255, 1) 60%,
-			rgba(0, 123, 255, 0.7) 100%
-		);
-		border-radius: 50%;
-		transform: translate(-50%, -50%);
-		animation: float 5s ease-in-out infinite alternate;
-		box-shadow: 0px 0px 100px 10px rgba(0, 123, 255, 0.6);
-		z-index: -10;
-		filter: blur(60px);
-	}
-	/* Float Animation */
-	@keyframes float {
-		0% {
-			transform: translate(-50vw, -50vh) translateY(0);
-		}
-		50% {
-			transform: translate(-50%, -50%) translateY(-30px);
-		}
-		100% {
-			transform: translate(+30vw, +30vh) translateY(0);
-		}
-	}
-</style>

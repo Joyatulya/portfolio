@@ -20,7 +20,7 @@
 </script>
 
 <section class="flex flex-col md:flex-row">
-	<p class="">LET'S <br /> CONNECT</p>
+	<p class="uppercase text-7xl font-serif ">LET'S <br /> CONNECT</p>
 	<div class="">
 		<p class="">I am always interested about</p>
 		{#each contact_links as link}

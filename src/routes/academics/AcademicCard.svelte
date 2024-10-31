@@ -12,7 +12,7 @@
 >
 	<div class="space-x-2">
 		{#each pub.type as t}
-			<Badge variant="outline">{t}</Badge>
+			<Badge class="text-[0.9em]" variant="outline">{t}</Badge>
 		{/each}
 	</div>
 	<a
