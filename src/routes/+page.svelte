@@ -3,9 +3,10 @@
 	import { PUBLICATIONS } from '$lib/portfolio_data/academic';
 	import { ArrowRight } from 'lucide-svelte';
 	import GithubRepoComponent from './GithubRepoComponent.svelte';
-	import Skills from './Skills.svelte';
 	import AcademicCard from './academics/AcademicCard.svelte';
 	import { slide } from 'svelte/transition';
+	import Intro from './Intro.svelte';
+	import Skills from './Skills.svelte';
 	const jobs = ['Joy', 'Doctor', 'Software Engineer', 'Data Scientist'];
 	let job_id = $state(0);
 	$effect(() => {
@@ -42,7 +43,7 @@
 			<img src="/assets/portrait.png" alt="Me, Joy Singhal" />
 		</div>
 	</section>
-	<Skills />
+	<Intro />
 	<div class="space-y-6">
 		<h2 class="h2 text-center">Academic Projects</h2>
 		<div class="space-y-4">
@@ -52,6 +53,7 @@
 		</div>
 		<Button href="/academics" class="w-full">See all Projects <ArrowRight /></Button>
 	</div>
+	<Skills />
 	<GithubRepoComponent />
 </main>
 

@@ -1,12 +1,12 @@
-export const TECH_STACK = [
-	'Web Development',
-	'Node.js',
-	'Python',
-	'JavaScript',
-	'TypeScript',
-	'Svelte / SvelteKit',
-	'SQL',
-	'Full Stack',
+export const TECH_STACK: { name: string, icon: string }[] = [
+	{ name: 'Web Development', icon: '/programming/html.png' },
+	{ name: 'Node.js', icon: '/programming/node.png' },
+	{ name: 'Python', icon: '/programming/python.svg' },
+	{ name: 'JavaScript', icon: '/programming/js.png' },
+	{ name: 'TypeScript', icon: '/programming/ts.png' },
+	{ name: 'Svelte / SvelteKit', icon: '/programming/svelte.png' },
+	{ name: 'SQL', icon: '/programming/postgres.png' },
+	{ name: 'CSS', icon: '/programming/css.png' },
 ]
 
 type TGITHUB_REPO = {
@@ -48,17 +48,17 @@ export const GITHUB_REPOS: TGITHUB_REPO[] = [
 	},
 	{
 		name: 'Web Crawler',
-		url : 'na',
+		url: 'na',
 		description: 'Made a web crawler to get data from a website to make my own natural language processing model.'
 	},
 	{
 		name: 'Logbook App',
-		url : 'na',
+		url: 'na',
 		description: 'An app to help trainees track their progress for their portfolio.'
 	},
 	{
 		name: 'JoyfulMeds',
-		url : 'na',
+		url: 'na',
 		description: 'App for steroid misuse'
 	},
 ]
