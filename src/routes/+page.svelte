@@ -2,12 +2,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import { PUBLICATIONS } from '$lib/portfolio_data/academic';
 	import { ArrowRight } from 'lucide-svelte';
-	import ContactMe from './ContactMe.svelte';
 	import GithubRepoComponent from './GithubRepoComponent.svelte';
 	import Skills from './Skills.svelte';
 	import AcademicCard from './academics/AcademicCard.svelte';
 	import { slide } from 'svelte/transition';
-	const jobs = ['Doctor', 'Software Engineer', 'Data Scientist'];
+	const jobs = ['Joy', 'Doctor', 'Software Engineer', 'Data Scientist'];
 	let job_id = $state(0);
 	$effect(() => {
 		let interval = setInterval(() => {
@@ -19,13 +18,26 @@
 
 <main class="space-y-8 p-4">
 	<section class="h-screen lg:max-h-[800px]">
-		<h1 class="h1 my-4">
-			Hello I am a
+		<h1 class="my-4 text-3xl">
+			Hello I am
+			{#if job_id !== 0}
+				<span in:slide>a</span>
+			{/if}
 			{#key job_id}
-				<span in:slide out:slide class="block">{jobs[job_id]}</span>
+				<span in:slide out:slide class="block text-4xl">{jobs[job_id]}</span>
 			{/key}
 		</h1>
-		<p class=" font-serif">On a quest to understand both carbon & silicon based life.</p>
+		<p class=" font-serif">
+			On a quest to understand both <span
+				class="gradient font-mono
+				uppercase">carbon</span
+			>
+			&
+			<span
+				class="gradient font-mono
+				uppercase">silicon</span
+			> based life.
+		</p>
 		<div class="p-8">
 			<img src="/assets/portrait.png" alt="Me, Joy Singhal" />
 		</div>
@@ -42,3 +54,11 @@
 	</div>
 	<GithubRepoComponent />
 </main>
+
+<style>
+	.gradient {
+		background: -webkit-linear-gradient(#eee, #333);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+</style>
