@@ -1,33 +1,69 @@
-import type { ISodiumPatient } from './types';
-import { roundNum } from '$lib/utils/numUtils';
-import moment from 'moment';
+import { z } from "zod";
 
-export enum SexTypes{
-  MALE = 'M',
-  FEMALE = 'F'
+export const fluids: { name: string, na: number }[] = [
+	{
+		name: '0.9% Saline',
+		na: 154
+	},
+	{
+		name: '0.45% Saline',
+		na: 77
+	},
+	{
+		name: "Hartmann's",
+		na: 131
+	},
+	{
+		name: "Lactated Ringer's",
+		na: 130
+	},
+	{
+		name: 'Enteral Water',
+		na: 0
+	},
+	{
+		name: '5% Dextrose',
+		na: 0
+	},
+	{
+		name: 'D5-2NS',
+		na: 34
+	}
+];
+
+export enum SexTypes {
+	MALE = 'M',
+	FEMALE = 'F'
 }
 
 export enum AgeGroupTypes {
-  CHILD = 'C',
-  ADULT = 'A',
-  ELDERLY = 'E'
+	CHILD = 'C',
+	ADULT = 'A',
+	ELDERLY = 'E'
 }
 
-export interface IBasicPatient{
-  age : AgeGroupTypes
-  sex: SexTypes
-  weight: number
-  height?: number
+export interface IBasicPatient {
+	age: AgeGroupTypes
+	sex: SexTypes
+	weight: number
+	height?: number
 }
+
+export const NaSchema = z.object({
+	weight : z.number().min(0).max(500).default(60),
+	curr_na : z.number().min(80).max(250),
+	target_na : z.number().min(80).max(250).default(140),
+	// age : z.number().int().positive().max(120).default(60)
+})
 
 export interface ISodiumPatient extends IBasicPatient {
-  insensible_losses: any;
-  other_losses: number;
-  urinary_losses: number;
-  curr_sodium : number;
-  target_sodium: number;
-  correction_rate: number;
-  correction_fluid_na: number;
+	// insensible_losses: number | undefined;
+	// other_losses: number;
+	// urinary_losses: number;
+	curr_sodium: number;
+	target_sodium: number;
+	// correction_rate: number;
+	// correction_fluid_na: number;
 }
 
 export class SodiumAnalysis {
@@ -113,30 +149,30 @@ export class SodiumAnalysis {
 		return this.w_coeff * this.weight;
 	}
 
-	get urinary_losses() : number{
+	get urinary_losses(): number {
 		let losses = this.patient_data.urinary_losses
 		losses = losses ? losses : 0
 		return losses
 	}
-	get other_losses() : number{
+	get other_losses(): number {
 		let losses = this.patient_data.other_losses
 		losses = losses ? losses : 0
 		return losses
 	}
-	get insensible_losses() : number{
+	get insensible_losses(): number {
 		let losses = this.patient_data.insensible_losses
 		losses = losses ? losses : 0
 		return losses
 	}
 
 	get total_other_losses() {
-		return roundNum(this.urinary_losses + this.other_losses + this.insensible_losses,1)
+		return roundNum(this.urinary_losses + this.other_losses + this.insensible_losses, 1)
 	}
 
 	water_deficit(): number | string {
-			let water_deficit = this.TBW * (this.curr_sodium / this.target_sodium - 1);
-			water_deficit = roundNum(water_deficit);
-			return SodiumAnalysis.number_penultimate_sanity_checking(water_deficit)
+		let water_deficit = this.TBW * (this.curr_sodium / this.target_sodium - 1);
+		water_deficit = roundNum(water_deficit);
+		return SodiumAnalysis.number_penultimate_sanity_checking(water_deficit)
 	}
 
 	change_na_per_litre_fluid() {
@@ -154,14 +190,14 @@ export class SodiumAnalysis {
 		return SodiumAnalysis.number_penultimate_sanity_checking(fluid_amount);
 	}
 
-	infusion_rate() {
-		// in ml/hr
-		let rate = (this.litre_fluid_per_day() / 24) * 1000;
-		rate = roundNum(rate, 1);
-		return SodiumAnalysis.number_penultimate_sanity_checking(rate)
-	}
+	// infusion_rate() {
+	// 	// in ml/hr
+	// 	let rate = (this.litre_fluid_per_day() / 24) * 1000;
+	// 	rate = roundNum(rate, 1);
+	// 	return SodiumAnalysis.number_penultimate_sanity_checking(rate)
+	// }
 
-	expected_treatment_duration(): string[] {
+	/* expected_treatment_duration(): string[] {
 		const TIME_FORMAT = 'ddd D/MM/YY HH:MM';
 		let duration = this.water_deficit() / this.litre_fluid_per_day();
 		duration = duration * 24;
@@ -172,7 +208,7 @@ export class SodiumAnalysis {
 		let end_time = moment().add(duration, 'hours');
 		let treatment_duration = start_time.format(TIME_FORMAT) + ' — ' + end_time.format(TIME_FORMAT)
 		let numIsTidy = SodiumAnalysis.number_penultimate_sanity_checking(duration)
-		if (numIsTidy === '-'){
+		if (numIsTidy === '-') {
 			return ['-', '']
 		}
 		if (duration > 48) {
@@ -181,7 +217,7 @@ export class SodiumAnalysis {
 			return [`${duration} days`, treatment_duration];
 		}
 		return [`${duration} hours`, treatment_duration];
-	}
+	} */
 
 	get_analysis() {
 		let analysis = {
@@ -195,16 +231,16 @@ export class SodiumAnalysis {
 			// 'corr fluid na': this.correction_fluid_na,
 			// 'change na / litre': this.change_na_per_litre_fluid(),
 			// 'corr rate': this.correction_rate,
-			'Water Deficit': this.water_deficit(),
-			Litre: this.litre_fluid_per_day(),
-			'infusion rate': this.infusion_rate(),
-			treatment_duration: this.expected_treatment_duration()
+			// 'Water Deficit': this.water_deficit(),
+			// Litre: this.litre_fluid_per_day(),
+			// 'infusion rate': this.infusion_rate(),
+			// treatment_duration: this.expected_treatment_duration()
 		};
 		return analysis;
 	}
 
 	// Utilities +++++++++++++++++++++++++++++++++++++++
-	static number_input_validation(number) {
+	static number_input_validation(number : number) {
 		let parsed_num = parseFloat(number);
 		if (parsed_num && !Number.isNaN(parsed_num)) {
 			return parsed_num;
@@ -214,8 +250,8 @@ export class SodiumAnalysis {
 		}
 	}
 
-	static number_penultimate_sanity_checking(num){
-		if (num === 0 || Number.isNaN(num) || !Number.isFinite(num)){
+	static number_penultimate_sanity_checking(num) {
+		if (num === 0 || Number.isNaN(num) || !Number.isFinite(num)) {
 			return '-'
 		}
 		return num
