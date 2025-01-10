@@ -4,18 +4,14 @@
 
 	const pt = $state({
 		curr_na: undefined,
-		target_na: 0,
+		target_na: 140,
 		weight: undefined
 	});
 
 	let na_pt = $derived.by(() => {
-		let parsed_pt;
-		try {
-			parsed_pt = NaSchema.parse(pt);
-		} catch (error) {
-			return null;
-		}
-		return new SodiumAnalysis(parsed_pt);
+		let parsed_pt = NaSchema.safeParse(pt)
+		console.warn("DEBUGPRINT[2]: +page.svelte:12: parsed_pt=", parsed_pt.error)
+		return parsed_pt.data
 	});
 </script>
 
