@@ -1,11 +1,9 @@
 <script lang="ts">
-	let { children } = $props();
+	import { setContext } from 'svelte';
 
-	// let unit: string | null = localStorage.getItem('unit');
-	// if (!unit) {
-	// 	unit = 'Imperial';
-	// 	localStorage.setItem('unit', unit);
-	// }
+	let { children, data } = $props();
+	let { user } = data;
+	setContext<typeof user>('user', user);
 </script>
 
 {@render children()}

@@ -21,7 +21,6 @@ Features
 	*/
 
 import type { number } from "echarts/core"
-import type { number } from "echarts/types/src/echarts.all.js"
 
 export function convert_mean_bm_to_hba1c(mean_bm: number): number {
 	return Math.round((mean_bm + 46.7) / 28.7 * 10) / 10
@@ -29,18 +28,21 @@ export function convert_mean_bm_to_hba1c(mean_bm: number): number {
 
 type Tbm_aggergation = ReturnType<InsulinAnalysis['bm_aggregation']>
 
+export function parse_bm(data: BM[]): PARSED_BM[] {
+	return data.map(x => {
+		return {
+			...x,
+			date: new Date(x.date),
+			type: x.type as bmType
+		}
+	})
+}
 class InsulinAnalysis {
 
 	HYPER_BM: number = 180
 	FASTING: [number, number] = [80, 99]
 	HYPO_BM: number = 70
-	PATIENT: PATIENT = {
-		age: 50,
-		height: 160,
-		weight: 60,
-		hba1c: 6.5,
-		isMale: true
-	}
+	// PATIENT: Omit<IPATIENT, 'insulin_analyser'>
 	NIGHT: [number, number] = [22, 6]
 
 
@@ -92,8 +94,8 @@ class InsulinAnalysis {
 	 * Given a list of BMs, returns the hyper and hypo readings. If no days
 	 * provided, it returns all readings
 	 * */
-	analysis(data: BM[], days: number | undefined) {
-		const parsed_data = days ? InsulinAnalysis.filter_data_on_days(InsulinAnalysis.parse_bm(data), days) : InsulinAnalysis.parse_bm(data)
+	analysis(data: PARSED_BM[], days: number | undefined) {
+		const parsed_data = days ? InsulinAnalysis.filter_data_on_days(data, days) : data
 		const hypos = this.filter_hypos(parsed_data)
 		const hypers = this.filter_hypers(parsed_data)
 		const fasting = this.bm_aggregation(parsed_data, bmType.FASTING)
@@ -101,8 +103,8 @@ class InsulinAnalysis {
 	}
 
 
-	calculate_averages(data: BM[], days = 7, validate_readings = false): { fasting: Tbm_aggergation, pre_dinner: Tbm_aggergation, pre_lunch: Tbm_aggergation, night: Tbm_aggergation, all: Tbm_aggergation } {
-		const parsed_data = days ? InsulinAnalysis.filter_data_on_days(InsulinAnalysis.parse_bm(data), days) : InsulinAnalysis.parse_bm(data)
+	calculate_averages(data: PARSED_BM[], days = 7, validate_readings = false): { fasting: Tbm_aggergation, pre_dinner: Tbm_aggergation, pre_lunch: Tbm_aggergation, night: Tbm_aggergation, all: Tbm_aggergation } {
+		const parsed_data = days ? InsulinAnalysis.filter_data_on_days(data, days) : data
 		const fasting = this.bm_aggregation(parsed_data, bmType.FASTING, days, validate_readings)
 		const pre_dinner = this.bm_aggregation(parsed_data, bmType.PRE_DINNER, days, validate_readings)
 		const pre_lunch = this.bm_aggregation(parsed_data, bmType.PRE_LUNCH, days, validate_readings)
@@ -113,15 +115,6 @@ class InsulinAnalysis {
 
 	// +++++++++++++++++ Static Methods +++++++++++++++++++++++
 
-	static parse_bm(data: BM[]): PARSED_BM[] {
-		return data.map(x => {
-			return {
-				...x,
-				date: new Date(x.date),
-				type: x.type as bmType
-			}
-		})
-	}
 
 	static filter_data_on_days(data: PARSED_BM[], days = 7) {
 		const now = new Date()
@@ -185,7 +178,7 @@ export class Basal_Bolus_T2DM extends InsulinAnalysis {
 		const table = type === 'FASTING' ? Basal_Bolus_T2DM.fastingInsulinAdjustmentTable : Basal_Bolus_T2DM.mealInsulinAdjustmentTable
 		return table.filter(x => between(mean, x.min, x.max))[0].adjustment
 	}
-	recommendation(data: BM[]) {
+	recommendation(data: PARSED_BM[]) {
 		const { night, pre_dinner, pre_lunch, fasting } = this.calculate_averages(data, 3)
 		const insulin_adjustments: TBasal_Bolus_Regimen = { breakfast: 0, lunch: 0, dinner: 0, basal: 0 }
 		if (!between(night.mean_bm, ...this.PRE_MEAL_BM_RANGE)) {
@@ -225,43 +218,42 @@ export class Basal_Bolus_T2DM extends InsulinAnalysis {
 	}
 }
 
-class NPH_OD_T2DM extends InsulinAnalysis {
+export class NPH_OD_T2DM extends InsulinAnalysis {
 	/**
 	 * https://www.straighthealthcare.com/insulin-dosing.html#insulin-therapy
 	 */
-	patient_insulin_dose: number
 	static HIGH_BM_CORRECTION_FACTOR: number = 0.1
 	static LOW_BM_CORRECTION_FACTOR: number = 0.15
+	patient: Omit<IPATIENT, 'insulin_analyser'>
+	basal_dose: number
 
-	constructor(insulin_dose: number) {
+	constructor(patient: Omit<IPATIENT, 'insulin_analyser'>) {
 		super()
-		this.patient_insulin_dose = insulin_dose
+		if (!patient || patient.insulinRegimen.type !== 'basal') throw new Error('Wrong Data given to wrong analyzer')
+		this.patient = patient
+		this.basal_dose = this.patient.insulinRegimen.basal_dose
 	}
 
 	//FIX: Make it robust
-	insulin_adjustment(data: BM[]): { previous_insulin_dose: number, insulin_dose_change: number, new_insulin_dose: number } {
+	recommendation(data: PARSED_BM[]): { previous_insulin_dose: number, insulin_dose_change: number, new_insulin_dose: number } {
 		let insulin_dose_change = 0
-		let new_insulin_dose = this.patient_insulin_dose
+		let new_insulin_dose = this.basal_dose
 
-		const parsed_data = InsulinAnalysis.parse_bm(data)
-		const { mean_bm: mean_fasting_bm, num_days } = this.bm_aggregation(parsed_data, bmType.FASTING)
-		const bm_comparison = advanced_between(mean_fasting_bm, ...this.FASTING)
+		const { mean_bm: mean_fasting_bm, } = this.bm_aggregation(data, bmType.FASTING, 3)
+		const bm_comparison = advanced_between(mean_fasting_bm, ...this.patient.fasting_targets)
 
 		if (bm_comparison === ComparisonOutcome.LOW) {
-			insulin_dose_change = - (NPH_OD_T2DM.LOW_BM_CORRECTION_FACTOR * this.patient_insulin_dose)
+			insulin_dose_change = - (NPH_OD_T2DM.LOW_BM_CORRECTION_FACTOR * this.basal_dose)
 			// assert(insulin_dose_change < 0, '****** MAJOR ERROR: Correcting Hypoglycemia with Increating Insulin ******')
 		} else if (bm_comparison === ComparisonOutcome.HIGH) {
-			insulin_dose_change = NPH_OD_T2DM.HIGH_BM_CORRECTION_FACTOR * this.patient_insulin_dose
+			insulin_dose_change = NPH_OD_T2DM.HIGH_BM_CORRECTION_FACTOR * this.basal_dose
 		}
 
 		// Being extra careful & playing it safe from hypoglycaemia perspective
 		new_insulin_dose = Math.floor(new_insulin_dose + insulin_dose_change)
-		console.log(new_insulin_dose / this.PATIENT.weight)
-		return { previous_insulin_dose: this.patient_insulin_dose, insulin_dose_change, new_insulin_dose }
+		return { previous_insulin_dose: this.basal_dose, insulin_dose_change, new_insulin_dose }
 	}
 }
-
-export const nph_od_t2dm = new NPH_OD_T2DM(20)
 
 class NPH_BD_T2DM extends InsulinAnalysis {
 	/**
@@ -305,22 +297,20 @@ class NPH_BD_T2DM extends InsulinAnalysis {
 		{ fasting_range: 3, pre_dinner_range: 1, adjustment: { morning: 0, bedtime: 1 } },
 	]
 
-	nph_analysis(data: BM[]) {
-		const parsed_data = InsulinAnalysis.parse_bm(data)
-		const fasting = this.bm_aggregation(parsed_data, bmType.FASTING, 4, false)
-		const pre_dinner = this.bm_aggregation(parsed_data, bmType.PRE_DINNER, 4, false)
+	nph_analysis(data: PARSED_BM[]) {
+		const fasting = this.bm_aggregation(data, bmType.FASTING, 4, false)
+		const pre_dinner = this.bm_aggregation(data, bmType.PRE_DINNER, 4, false)
 		const all_readings = [...fasting.readings, ...pre_dinner.readings]
 		const mean_all_readings = all_readings.reduce((a, c) => a + c.value, 0) / all_readings.length
 		return { mean_all_readings, mean_fasting: fasting.mean_bm, mean_pre_dinner: pre_dinner.mean_bm }
 	}
 
-	insulin_adjustment(data: BM[]) {
+	insulin_adjustment(data: PARSED_BM[]) {
 		let total_insulin_adjustment: number = 0
 		let morning_insulin_adjustment: number = 0
 		let bedtime_insulin_adjustment: number = 0
 
-		const parsed_data = InsulinAnalysis.parse_bm(data)
-		const { mean_fasting, mean_pre_dinner, mean_all_readings } = this.nph_analysis(parsed_data)
+		const { mean_fasting, mean_pre_dinner, mean_all_readings } = this.nph_analysis(data)
 
 		//Ranges calculation
 		const pre_dinner_range = this.calc_adjutment_range(mean_pre_dinner, NPH_T2DM.pre_dinner_ranges)
@@ -377,12 +367,16 @@ export type BM = {
 export type PARSED_BM = Omit<BM, 'date' | 'type'> & { date: Date, type: bmType }
 
 
-export interface PATIENT {
+export interface IPATIENT {
 	age: number,
 	height: number,
 	weight: number,
 	isMale: boolean,
-	hba1c: number
+	hba1c: number,
+	insulinRegimen: TBasalInsulin | TNPH_BD_Insulin,
+	units?: 'metric' | 'imperial',
+	insulin_analyser: typeof NPH_OD_T2DM | typeof NPH_BD_T2DM | typeof Basal_Bolus_T2DM,
+	fasting_targets: [number, number]
 }
 
 export enum ComparisonOutcome {
@@ -392,4 +386,62 @@ export enum ComparisonOutcome {
 }
 
 
-export const INSULIN_REGIMENS = { 'nph_od': { label: 'Once a day Insulin', className: NPH_OD_T2DM }, 'nph_bd': { label: 'NPH Twice a day', className: NPH_BD_T2DM } }
+export const basal_insulins = [
+	'NPH / Humulin® N / Novolin® N',
+	'Basaglar® (insulin glargine)',
+	'Lantus® (insulin glargine)',
+	'Rezvoglar® (insulin glargine)',
+	'Semglee® (insulin glargine)',
+	'Toujeo® (insulin glargine)',
+	'Levemir® (insulin detemir)',
+	'Tresiba® (insulin degludec)',
+	// 'Insulin glargine / Basaglar® / Lantus® / Rezvoglar® / Semglee® / Toujeo®',
+	// 'Insulin detemir / Levemir® ',
+	// 'Insulin degludec / Tresiba®',
+] as const
+
+export interface TBasalInsulin {
+	type: 'basal',
+	basal_time: string,
+	basal_dose: number,
+	basal_insulin: typeof basal_insulins[number]
+}
+
+export interface TNPH_BD_Insulin {
+	type: 'nph_bd'
+	basal_am_time: string,
+	basal_am_dose: number,
+	basal_pm_time: string,
+	basal_pm_dose: number,
+	basal_insulin: typeof basal_insulins[0]
+}
+
+export interface TBolusInsulin {
+	type: 'basal_bolus',
+	bolus_insulin: typeof rapid_insulins[number] | typeof short_insulins[number],
+	bolus_lunch_time: string,
+	bolus_lunch_dose: number,
+	bolus_dinner_time: string,
+	bolus_dinner_dose: number,
+	bolus_night_time: string,
+	bolus_night_dose: number
+}
+
+export type TBasalBolusInsulin = TBasalInsulin & TBolusInsulin
+
+export const rapid_insulins = [
+	'Admelog® (insulin lispro)',
+	'Afrezza® (inhaled insulin)',
+	'Apidra® (insulin glulisine)',
+	'Fiasp® (insulin aspart)',
+	'Humalog® (insulin lispro)',
+	'Lyumjev® (insulin lispro-aabc)',
+	'Novolog® (insulin aspart)',
+] as const
+
+export const short_insulins = [
+	'Humulin® R(regular)',
+	'Novolin® R(regular)',
+] as const
+
+export const INSULIN_ANALYSERS = { 'basal': NPH_OD_T2DM, 'nph_bd': NPH_BD_T2DM, 'basal_bolus': Basal_Bolus_T2DM }

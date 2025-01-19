@@ -11,21 +11,25 @@ so that we can make more informed decisions for you.
 		Basal_Bolus_T2DM,
 		convert_mean_bm_to_hba1c,
 		insulin_analysis,
-		INSULIN_REGIMENS,
-		nph_od_t2dm
+		type IPATIENT
 	} from './insulinAnalysis';
 	import ReadingEntry from './components/ReadingEntry.svelte';
 	import { movingAverage } from '$lib/utils/dataUtils';
-	import { dummyBM } from './mockDB';
+	import { Settings } from 'lucide-svelte';
+	import InsulinInformation from './components/InsulinInformation.svelte';
+	import { getContext } from 'svelte';
 
-	let length = $state(dummyBM.length);
-	let data = $derived(dummyBM.slice(0, length));
+	let { data } = $props();
+	let { data: bm_data } = data;
+
+	const user: IPATIENT = getContext('user');
+	const analyser = user.insulin_analyser;
+
 	let option: EChartsOption = $derived.by(() => {
-		console.log('updates', length);
 		let option = {
 			xAxis: {
 				type: 'category',
-				data: data.map((x) => new Date(x.date).getDate())
+				data: data.data.map((x) => new Date(x.date).getDate())
 			},
 			yAxis: {
 				type: 'value'
@@ -33,14 +37,14 @@ so that we can make more informed decisions for you.
 			series: [
 				{
 					data: movingAverage(
-						data.slice(0, length).map((x) => x.value),
+						data.data.map((x) => x.value),
 						3
 					),
 					type: 'line',
 					smooth: true
 				},
 				{
-					data: data.slice(0, length).map((x) => x.value),
+					data: data.data.map((x) => x.value),
 					type: 'line',
 					smooth: true
 				}
@@ -48,15 +52,19 @@ so that we can make more informed decisions for you.
 		};
 		return { ...option };
 	});
-	const analysis = insulin_analysis.calculate_averages(dummyBM, 7);
-	const hypos = insulin_analysis.filter_hypos(dummyBM);
-	const basal_bolus = new Basal_Bolus_T2DM({ breakfast: 3, basal: 10 }).recommendation(dummyBM);
+
+	const analysis = analyser.calculate_averages(bm_data, 5);
+	const hypos = analyser.filter_hypos(bm_data);
 	const estimated_hba1c = convert_mean_bm_to_hba1c(analysis.all.mean_bm) + '%';
+	console.log(analyser.recommendation(bm_data));
 </script>
 
 <main class="relative p-4">
+	<a href="/projects/insulin/settings"><Settings /></a>
+	<div class="h-96" use:mountEchart={option}></div>
+	<InsulinInformation />
 	<ReadingEntry />
-	<div class="space-y-2 divide-y-2 py-3">
+	<div class="space-y-2 divide-y-2">
 		<div class="flex py-2 *:flex-1">
 			{@render basic_data('Your Sugar Control', 'Improving')}
 		</div>
@@ -85,7 +93,6 @@ so that we can make more informed decisions for you.
 			</div>
 		</div>
 	</div>
-	<div class="h-96" use:mountEchart={option}></div>
 </main>
 
 {#snippet basic_data(label: string, data: string | number)}

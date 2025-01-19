@@ -13,7 +13,7 @@
 	
 	<Dialog.Trigger
 		class={buttonVariants({ size: 'lg'}) +
-			' absolute right-[6vw] top-[90vh] z-50 text-lg font-semibold '}
+			' fixed right-[6vw] top-[90vh] z-50 text-lg font-semibold '}
 		><Plus />
 		Reading</Dialog.Trigger
 	>
@@ -29,6 +29,10 @@
 			<div class="grid grid-cols-4 items-center gap-4">
 				<Label for="bm" class="text-right">Sugar Level</Label>
 				<Input id="bm" placeholder="mg/dl" class="col-span-3" />
+			</div>
+			<div class="grid grid-cols-4 items-center gap-4">
+				<Label for="bm" class="text-right">Correctional Insulin Dose</Label>
+				<Input id="bm" placeholder="units" class="col-span-3" />
 			</div>
 			<div class="grid grid-cols-4 items-center gap-4">
 				<Label for="date" class="text-right">Time</Label>
