@@ -80,6 +80,7 @@ class InsulinAnalysis {
 		// readings
 		const reading_days = new Set(specifid_bms_specific_days.map(x => x.date))
 		if (check_reading_num && reading_days.size <= 2) {
+			console.log(reading_days)
 			throw new Error('Not enough readings for ' + reading_type)
 		}
 
@@ -103,14 +104,22 @@ class InsulinAnalysis {
 	}
 
 
-	calculate_averages(data: PARSED_BM[], days = 7, validate_readings = false): { fasting: Tbm_aggergation, pre_dinner: Tbm_aggergation, pre_lunch: Tbm_aggergation, night: Tbm_aggergation, all: Tbm_aggergation } {
+	// BUG: Validate Readings might cause more problems than it will solve
+	calculate_averages(data: PARSED_BM[], days = 7, validate_readings = false, readings?: `${bmType}`[]): Record<`${bmType}` | 'all', Tbm_aggergation> {
 		const parsed_data = days ? InsulinAnalysis.filter_data_on_days(data, days) : data
-		const fasting = this.bm_aggregation(parsed_data, bmType.FASTING, days, validate_readings)
-		const pre_dinner = this.bm_aggregation(parsed_data, bmType.PRE_DINNER, days, validate_readings)
-		const pre_lunch = this.bm_aggregation(parsed_data, bmType.PRE_LUNCH, days, validate_readings)
-		const night = this.bm_aggregation(parsed_data, bmType.NIGHT, days, validate_readings)
-		const all = this.bm_aggregation(parsed_data, undefined, days, validate_readings)
-		return { fasting, pre_dinner, pre_lunch, night, all }
+		let averages: Record<`${bmType}` | 'all', Tbm_aggergation> = {}
+		if (readings) {
+			for (let key of readings) {
+				averages[key] = this.bm_aggregation(parsed_data, key)
+			}
+		} else {
+			averages.fasting = this.bm_aggregation(parsed_data, bmType.FASTING, days, validate_readings)
+			averages.pre_dinner = this.bm_aggregation(parsed_data, bmType.PRE_DINNER, days, validate_readings)
+			averages.pre_lunch = this.bm_aggregation(parsed_data, bmType.PRE_LUNCH, days, validate_readings)
+			averages.night = this.bm_aggregation(parsed_data, bmType.NIGHT, days, validate_readings)
+		}
+			averages.all = this.bm_aggregation(parsed_data, undefined, days, validate_readings)
+		return averages
 	}
 
 	// +++++++++++++++++ Static Methods +++++++++++++++++++++++
@@ -264,16 +273,25 @@ class NPH_BD_T2DM extends InsulinAnalysis {
 	 * Adjustments
 	 * - Can be made every 3 days
 	*/
+	patient: Omit<IPATIENT, 'insulin_analyser'>
+
+	constructor(patient: Omit<IPATIENT, 'insulin_analyser'>) {
+		super()
+		this.patient = patient
+	}
+
 	static fasting_ranges: { min: number; max: number; range: number }[] = [
 		{ min: 160, max: Infinity, range: 3 },
 		{ min: 101, max: 160, range: 2 },
 		{ min: -Infinity, max: 100, range: 1 },
 	];
+
 	static pre_dinner_ranges: { min: number; max: number; range: number }[] = [
 		{ min: 161, max: Infinity, range: 3 },
 		{ min: 131, max: 160, range: 2 },
 		{ min: -Infinity, max: 130, range: 1 },
 	];
+
 	static adjustmentTable: { min: number; max: number; adjustment: number }[] = [
 		{ min: 180, max: Infinity, adjustment: 8 },
 		{ min: 160, max: 179, adjustment: 6 },
@@ -297,33 +315,25 @@ class NPH_BD_T2DM extends InsulinAnalysis {
 		{ fasting_range: 3, pre_dinner_range: 1, adjustment: { morning: 0, bedtime: 1 } },
 	]
 
-	nph_analysis(data: PARSED_BM[]) {
-		const fasting = this.bm_aggregation(data, bmType.FASTING, 4, false)
-		const pre_dinner = this.bm_aggregation(data, bmType.PRE_DINNER, 4, false)
-		const all_readings = [...fasting.readings, ...pre_dinner.readings]
-		const mean_all_readings = all_readings.reduce((a, c) => a + c.value, 0) / all_readings.length
-		return { mean_all_readings, mean_fasting: fasting.mean_bm, mean_pre_dinner: pre_dinner.mean_bm }
-	}
 
-	insulin_adjustment(data: PARSED_BM[]) {
+	recommendation(data: PARSED_BM[]) {
 		let total_insulin_adjustment: number = 0
 		let morning_insulin_adjustment: number = 0
 		let bedtime_insulin_adjustment: number = 0
 
-		const { mean_fasting, mean_pre_dinner, mean_all_readings } = this.nph_analysis(data)
-
+		const { fasting, pre_dinner, all } = this.calculate_averages(data, 3, true, ['fasting', 'pre_dinner'])
 		//Ranges calculation
-		const pre_dinner_range = this.calc_adjutment_range(mean_pre_dinner, NPH_T2DM.pre_dinner_ranges)
-		const fasting_range = this.calc_adjutment_range(mean_fasting, NPH_T2DM.fasting_ranges)
+		const pre_dinner_range = this.calc_adjutment_range(pre_dinner.mean_bm, NPH_BD_T2DM.pre_dinner_ranges)
+		const fasting_range = this.calc_adjutment_range(fasting.mean_bm, NPH_BD_T2DM.fasting_ranges)
 
 		// Insulin Dose calculations
-		total_insulin_adjustment = this.calc_insulin_adjustment(mean_all_readings)
+		total_insulin_adjustment = this.calc_insulin_adjustment(all.mean_bm)
 
 		//Check if we have to reduce insulin
 		//BUG: Have to make this more robust
 		if (total_insulin_adjustment < 0) {
-			const minimum = Math.min(mean_fasting, mean_pre_dinner)
-			if (minimum === mean_pre_dinner) {
+			const minimum = Math.min(fasting.mean_bm, pre_dinner.mean_bm)
+			if (minimum === pre_dinner.mean_bm) {
 				morning_insulin_adjustment = total_insulin_adjustment
 			} else {
 				bedtime_insulin_adjustment = total_insulin_adjustment
@@ -340,7 +350,7 @@ class NPH_BD_T2DM extends InsulinAnalysis {
 	}
 
 	calc_insulin_adjustment(mean: number) {
-		return NPH_T2DM.adjustmentTable.filter(x => between(mean, x.min, x.max))[0].adjustment
+		return NPH_BD_T2DM.adjustmentTable.filter(x => between(mean, x.min, x.max))[0].adjustment
 	}
 	calc_adjutment_range(mean: number, table: typeof NPH_BD_T2DM.fasting_ranges) {
 		return table.filter(x => between(mean, x.min, x.max))[0].range
@@ -353,8 +363,8 @@ class NPH_BD_T2DM extends InsulinAnalysis {
 
 export enum bmType {
 	FASTING = 'fasting',
-	PRE_LUNCH = 'pre-lunch',
-	PRE_DINNER = 'pre-dinner',
+	PRE_LUNCH = 'pre_lunch',
+	PRE_DINNER = 'pre_dinner',
 	NIGHT = 'night',
 }
 
