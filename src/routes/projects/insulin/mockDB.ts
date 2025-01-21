@@ -1,28 +1,58 @@
-import type { BM } from "./insulinAnalysis";
+import type { BM, bmType } from "./insulinAnalysis";
+import {faker} from '@faker-js/faker'
 
-export const dummyBM: BM[] =
-	[
-		{ "date": "2025-01-15T07:00:00Z", "value": 62, "type": "fasting" },
-		{ "date": "2025-01-15T12:00:00Z", "value": 180, "type": "pre_lunch" },
-		{ "date": "2025-01-15T22:00:00Z", "value": 145, "type": "night" },
+function get_dummy_date(days_ago: number, value: number, time: `${bmType}`) {
+	const today = new Date()
+	today.setDate(today.getDate() - days_ago)
+	const times: Record<`${bmType}`, number> = {
+		fasting: 7,
+		pre_lunch: 12,
+		pre_dinner: 19,
+		night: 22
+	}
+	today.setHours(times[time])
+	return { "date": today.toJSON(), value, "type": time }
+}
 
-		{ "date": "2025-01-16T08:00:00Z", "value": 105, "type": "fasting" },
-		{ "date": "2025-01-16T14:00:00Z", "value": 215, "type": "pre_lunch" },
-		{ "date": "2025-01-16T19:30:00Z", "value": 100, "type": "pre_dinner" },
+function random_array_element(arr: any[]) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
 
-		{ "date": "2025-01-17T07:15:00Z", "value": 68, "type": "fasting" },
-		{ "date": "2025-01-17T13:30:00Z", "value": 195, "type": "pre_lunch" },
-		{ "date": "2025-01-17T21:45:00Z", "value": 105, "type": "pre_dinner" },
+const hyper_bm: BM[] = [
+	get_dummy_date(3, 178, 'fasting'),
+	get_dummy_date(3, 250, 'pre_lunch'),
+	get_dummy_date(3, 310, 'pre_dinner'),
 
-		{ "date": "2025-01-18T07:00:00Z", "value": 60, "type": "fasting" },
-		{ "date": "2025-01-18T12:45:00Z", "value": 175, "type": "pre_lunch" },
-		{ "date": "2025-01-18T20:00:00Z", "value": 100, "type": "pre_dinner" },
+	get_dummy_date(2, 165, 'fasting'),
+	get_dummy_date(2, 300, 'pre_lunch'),
+	get_dummy_date(2, 310, 'pre_dinner'),
 
-		{ "date": "2025-01-19T08:00:00Z", "value": 65, "type": "fasting" },
-		{ "date": "2025-01-19T13:15:00Z", "value": 210, "type": "pre_lunch" },
-		{ "date": "2025-01-19T22:30:00Z", "value": 100, "type": "pre_dinner" },
+	get_dummy_date(1, 195, 'fasting'),
+	get_dummy_date(1, 350, 'pre_lunch'),
+	get_dummy_date(1, 200, 'pre_dinner'),
 
-		{ "date": "2025-01-20T06:00:00Z", "value": 65, "type": "fasting" },
-		{ "date": "2025-01-20T13:15:00Z", "value": 160, "type": "pre_lunch" },
-		{ "date": "2025-01-20T22:30:00Z", "value": 110, "type": "pre_dinner" }
-	]
+	get_dummy_date(0, 150, 'fasting'),
+	get_dummy_date(0, 260, 'pre_lunch'),
+	get_dummy_date(0, 210, 'pre_dinner'),
+]
+
+const hypo_bm: BM[] = [
+	get_dummy_date(3, 65, 'fasting'),
+	get_dummy_date(3, 150, 'pre_lunch'),
+	get_dummy_date(3, 110, 'pre_dinner'),
+
+	get_dummy_date(2, 65, 'fasting'),
+	get_dummy_date(2, 150, 'pre_lunch'),
+	get_dummy_date(2, 110, 'pre_dinner'),
+
+	get_dummy_date(1, 65, 'fasting'),
+	get_dummy_date(1, 150, 'pre_lunch'),
+	get_dummy_date(1, 110, 'pre_dinner'),
+
+	get_dummy_date(0, 65, 'fasting'),
+	get_dummy_date(0, 160, 'pre_lunch'),
+	get_dummy_date(0, 110, 'pre_dinner'),
+]
+
+// export const dummyBM = faker.helpers.arrayElements([hyper_bm, hypo_bm])
+export const dummyBM = random_array_element([hyper_bm, hypo_bm])

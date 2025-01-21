@@ -18,6 +18,7 @@ so that we can make more informed decisions for you.
 	import { Settings } from 'lucide-svelte';
 	import InsulinInformation from './components/InsulinInformation.svelte';
 	import { getContext } from 'svelte';
+	import InsulinRecommendation from './InsulinRecommendation.svelte';
 
 	let { data } = $props();
 	let { data: bm_data } = data;
@@ -63,6 +64,7 @@ so that we can make more informed decisions for you.
 	<a href="/projects/insulin/settings"><Settings /></a>
 	<div class="h-96" use:mountEchart={option}></div>
 	<InsulinInformation />
+	<InsulinRecommendation />
 	<ReadingEntry />
 	<div class="space-y-2 divide-y-2">
 		<div class="flex py-2 *:flex-1">
@@ -81,7 +83,7 @@ so that we can make more informed decisions for you.
 		</div>
 		<div class="flex py-2 *:flex-1">
 			{@render basic_data('Hypos in 7 days', hypos.length)}
-			{@render basic_data('Lowest Sugar', hypos[0].value + ' mg/dl')}
+			<!-- {@render basic_data('Lowest Sugar', hypos?.[0].value + ' mg/dl')} -->
 		</div>
 		<div>
 			{@render basic_data('Average Sugar', analysis.all.mean_bm)}

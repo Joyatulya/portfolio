@@ -11,16 +11,13 @@
 	- Medications which they are already taking, because there is no point changing insulin if on suboptimal therapy.
 	- Personal targets, hyper & hypo ranges.
 
-Types on measurements
-- breakfast, lunch, dinner (before & after above)
-- basal am, basal pm
-- random , fasting
 Features
 	-	This could be a central area from which you can even show doctors in india how your glycemic control has been.
 	- When they pick to add something, if it is around lunch, it will ask about carb & amount of insulin you are using apart from BM. Essentially it will be smart in this sense.
+	- Just like garmin, the app has different states in which it functions.
+		There can be a monitoring phase in which it has made a change & now is just observing. It will just see how your sugar is. It can then switch to a reccomendation phase in which it believes that you should make a change to your regimen because you are not meeting targets. It can then maintaience phase(could be named better), in which you are in targets & maintaining that. You should continue on the same regimen.
 	*/
 
-import type { number } from "echarts/core"
 
 export function convert_mean_bm_to_hba1c(mean_bm: number): number {
 	return Math.round((mean_bm + 46.7) / 28.7 * 10) / 10
@@ -85,7 +82,7 @@ class InsulinAnalysis {
 		}
 
 		let mean_bm = specifid_bms_specific_days.reduce((a, c) => a + c.value, 0) / specifid_bms_specific_days.length
-		mean_bm = Math.round(mean_bm * 10) / 10
+		mean_bm = Math.round(mean_bm)
 
 		return { readings: specifid_bms_specific_days, mean_bm, num_days: reading_days.size, num_readings: specifid_bms_specific_days.length }
 	}
