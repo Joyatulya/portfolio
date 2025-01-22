@@ -5,7 +5,7 @@
 	import { Label } from '$lib/components/ui/label/index.js';
 	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
 	import { Plus } from 'lucide-svelte';
-	import { bmType } from '../insulinAnalysis';
+	import { enumBMType } from '../insulinAnalysis';
 	import { scrollY } from 'svelte/reactivity/window';
 </script>
 
@@ -39,7 +39,7 @@
 				<Input id="date" value={new Date()} class="col-span-3" />
 			</div>
 			<RadioGroup.Root class="flex flex-wrap gap-y-4" value="FASTING">
-				{#each Object.keys(bmType) as type}
+				{#each Object.keys(enumBMType) as type}
 					<div class="">
 						<Label for={type} class="m-1 border p-3	[&:has([data-state=checked])]:border-primary"
 							>{type}

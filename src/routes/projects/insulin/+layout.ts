@@ -1,4 +1,4 @@
-import { INSULIN_ANALYSERS, type IPATIENT } from "./insulinAnalysis"
+import { insulinRegimenFactory, type IPATIENT } from "./insulinAnalysis"
 
 export async function load() {
 
@@ -10,18 +10,18 @@ export async function load() {
 		isMale: true,
 		fasting_targets: [80, 100],
 		insulinRegimen: {
-			// type: 'basal',
-			// basal_insulin: 'Semglee® (insulin glargine)',
-			// basal_dose: 10,
-			// basal_time: '22:00'
-			 type : 'nph_bd',
-			basal_am_dose: 10,
-			basal_am_time: '08:00',
-			basal_pm_dose: 10,
-			basal_pm_time: '21:00',
-			basal_insulin: 'NPH / Humulin® N / Novolin® N'
+			type: 'basal',
+			basal_insulin: 'Semglee® (insulin glargine)',
+			basal_dose: 10,
+			basal_time: '22:00'
+			//  type : 'nph_bd',
+			// basal_am_dose: 10,
+			// basal_am_time: '08:00',
+			// basal_pm_dose: 10,
+			// basal_pm_time: '21:00',
+			// basal_insulin: 'NPH / Humulin® N / Novolin® N'
 		}
 	}
-	user['insulin_analyser'] = new INSULIN_ANALYSERS[user.insulinRegimen.type](user)
+	user['insulin_analyser'] = insulinRegimenFactory( user )
 	return { user }
 }

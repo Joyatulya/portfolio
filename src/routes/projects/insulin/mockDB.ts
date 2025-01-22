@@ -1,10 +1,10 @@
-import type { BM, bmType } from "./insulinAnalysis";
+import type { BM, enumBMType } from "./insulinAnalysis";
 import {faker} from '@faker-js/faker'
 
-function get_dummy_date(days_ago: number, value: number, time: `${bmType}`) {
+function get_dummy_date(days_ago: number, value: number, time: `${enumBMType}`) {
 	const today = new Date()
 	today.setDate(today.getDate() - days_ago)
-	const times: Record<`${bmType}`, number> = {
+	const times: Record<`${enumBMType}`, number> = {
 		fasting: 7,
 		pre_lunch: 12,
 		pre_dinner: 19,
@@ -19,6 +19,19 @@ function random_array_element(arr: any[]) {
 }
 
 const hyper_bm: BM[] = [
+
+	get_dummy_date(6, 178, 'fasting'),
+	get_dummy_date(6, 250, 'pre_lunch'),
+	get_dummy_date(6, 310, 'pre_dinner'),
+
+	get_dummy_date(5, 178, 'fasting'),
+	get_dummy_date(5, 250, 'pre_lunch'),
+	get_dummy_date(5, 310, 'pre_dinner'),
+
+	get_dummy_date(4, 178, 'fasting'),
+	get_dummy_date(4, 250, 'pre_lunch'),
+	get_dummy_date(4, 310, 'pre_dinner'),
+
 	get_dummy_date(3, 178, 'fasting'),
 	get_dummy_date(3, 250, 'pre_lunch'),
 	get_dummy_date(3, 310, 'pre_dinner'),
@@ -37,8 +50,22 @@ const hyper_bm: BM[] = [
 ]
 
 const hypo_bm: BM[] = [
-	get_dummy_date(3, 65, 'fasting'),
-	get_dummy_date(3, 150, 'pre_lunch'),
+
+	get_dummy_date(6, 178, 'fasting'),
+	get_dummy_date(6, 250, 'pre_lunch'),
+	get_dummy_date(6, 310, 'pre_dinner'),
+
+	get_dummy_date(5, 178, 'fasting'),
+	get_dummy_date(5, 250, 'pre_lunch'),
+	get_dummy_date(5, 310, 'pre_dinner'),
+
+	get_dummy_date(4, 178, 'fasting'),
+	get_dummy_date(4, 250, 'pre_lunch'),
+	get_dummy_date(4, 310, 'pre_dinner'),
+
+
+	get_dummy_date(3, 85, 'fasting'),
+	get_dummy_date(3, 200, 'pre_lunch'),
 	get_dummy_date(3, 110, 'pre_dinner'),
 
 	get_dummy_date(2, 65, 'fasting'),
