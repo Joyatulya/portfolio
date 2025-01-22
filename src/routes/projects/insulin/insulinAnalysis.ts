@@ -22,7 +22,12 @@ Features
 
 // Helper Functions
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+const groupBy = function(xs, key) {
+  return xs.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+};
 
 export function convert_mean_bm_to_hba1c(mean_bm: number): number {
 	return Math.round((mean_bm + 46.7) / 28.7 * 10) / 10
@@ -116,7 +121,7 @@ abstract class InsulinAnalysis {
 
 		// @ts-ignore
 		const result = {} as TMealAggregation
-		const grouping = { ...Object.groupBy(data, ({ type }) => type), all: data }
+		const grouping = { ...groupBy(data, 'type'), all: data }
 
 		for (let [key, value] of Object.entries(grouping)) {
 			let final = {} as Tbm_aggergation
