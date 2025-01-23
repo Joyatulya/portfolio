@@ -3,14 +3,14 @@
 	import type { EChartsOption } from 'echarts';
 	import { movingAverage } from '$lib/utils/dataUtils';
 	import type { PARSED_BM } from './insulinAnalysis';
+	import { getContext } from 'svelte';
 
-	let { data }: { data: PARSED_BM[] } = $props();
-
+	let bm_data = getContext<{ value: PARSED_BM[] }>('bm_data');
 	let option: EChartsOption = $derived.by(() => {
 		let option = {
 			xAxis: {
 				type: 'category',
-				data: data.map((x) => x.date.getDate())
+				data: bm_data.value.map((x) => x.date.getDate())
 			},
 			yAxis: {
 				type: 'value'
@@ -19,7 +19,7 @@
 				{
 					name: 'Average',
 					data: movingAverage(
-						data.map((x) => x.value),
+						bm_data.value.map((x) => x.value),
 						3
 					),
 					type: 'line',
@@ -27,7 +27,7 @@
 				},
 				{
 					name: 'Sugar Levels',
-					data: data.map((x) => x.value),
+					data: bm_data.value.map((x) => x.value),
 					type: 'line',
 					smooth: true,
 					markArea: {
@@ -37,25 +37,9 @@
 								{
 									// name: 'Hypoglycaemia',
 									itemStyle: {
-										color: 'rgba(255, 73, 77, 0.05)'
+										color: 'rgba(55, 173, 77, 0.2)'
 									},
-									yAxis: 70
-									// xAxis: '19',
-									// coord: [19, 100]
-								},
-								{
-									yAxis: 0
-									// xAxis: '21',
-									// coord: [21, 100]
-								}
-							],
-							[
-								{
-									// name: 'Hyperglycaemia',
-									yAxis: Infinity,
-									itemStyle: {
-										color: 'rgba(100, 73, 0, 0.1)'
-									}
+									yAxis: 80
 									// xAxis: '19',
 									// coord: [19, 100]
 								},
@@ -74,4 +58,11 @@
 	});
 </script>
 
-<div class="h-96" use:mountEchart={option}></div>
+<svelte:boundary>
+	{#key bm_data.value}
+		<div class="h-96" use:mountEchart={option}></div>
+	{/key}
+	{#snippet failed()}
+		It Failed
+	{/snippet}
+</svelte:boundary>

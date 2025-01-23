@@ -52,7 +52,7 @@
 <Accordion.Root type="single" value="item-1">
 	<Accordion.Item value="item-1">
 		<Accordion.Trigger>Why am I being advised to change my insulin?</Accordion.Trigger>
-		<Accordion.Content class='space-y-4'>
+		<Accordion.Content class="space-y-4">
 			<p>
 				We noted that over the past 3 days, you have had
 				<span class="font-semibold">{text_curr_user_status(current_user_status)}</span>
@@ -65,10 +65,11 @@
 				to
 				<span class="font-semibold">{new_regimen.basal_dose} units</span>.
 			</p>
-			<p>We are hoping this will help you reach your target sugar levels soon.
-				It is very important to monitor your blood sugar levels in the next few
-			days especialLy and be on the lookout for any signs of <a href="#">low
-					sugar levels</a>. </p>
+			<p>
+				We are hoping this will help you reach your target sugar levels soon. It is very important
+				to monitor your blood sugar levels in the next few days especialLy and be on the lookout for
+				any signs of <a href="#">low sugar levels</a>.
+			</p>
 		</Accordion.Content>
 	</Accordion.Item>
 </Accordion.Root>

@@ -6,7 +6,6 @@ export const mountEchart: Action<HTMLDivElement, EChartsOption> = (node, options
 		const echart = init(node)
 		echart.setOption(options)
 		return () => {
-			console.log('Chart Teardown')
 			echart.dispose()
 		}
 	})

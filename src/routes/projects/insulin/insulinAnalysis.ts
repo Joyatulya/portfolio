@@ -23,10 +23,10 @@ Features
 // Helper Functions
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 const groupBy = function(xs, key) {
-  return xs.reduce(function(rv, x) {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
+	return xs.reduce(function(rv, x) {
+		(rv[x[key]] = rv[x[key]] || []).push(x);
+		return rv;
+	}, {});
 };
 
 export function convert_mean_bm_to_hba1c(mean_bm: number): number {
@@ -62,7 +62,7 @@ export function parse_bm(data: BM[]): PARSED_BM[] {
 }
 
 
-abstract class InsulinAnalysis {
+export abstract class InsulinAnalysis {
 
 	HYPER_BM: number = 180
 	HYPO_BM: number = 70
@@ -180,7 +180,7 @@ abstract class InsulinAnalysis {
 
 type Tbm_aggergation = { readings: PARSED_BM[], mean: number, num_days: number }
 type TMealAggregation = Record<`${enumBMType}` | 'all', Tbm_aggergation>
-type TTopAggregation = Record<'all' | 'until_start_day' | 'start_day_to_end_day', TMealAggregation>
+export type TTopAggregation = Record<'all' | 'until_start_day' | 'start_day_to_end_day', TMealAggregation>
 
 
 export enum Temporal_User_Status {

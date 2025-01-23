@@ -4,15 +4,17 @@
 	import { getContext } from 'svelte';
 	import type { IPATIENT, PARSED_BM } from './insulinAnalysis';
 	import InsulinChangeReason from './components/InsulinChangeReason.svelte';
-
-	let { bm_data }: { bm_data: PARSED_BM[] } = $props();
-
 	const { insulin_analyser } = getContext<IPATIENT>('user');
-	const recommendation = insulin_analyser.recommendation(bm_data);
-	const { insulin_change, temporal_user_status, current_user_status, app_status } = recommendation;
-	const { old_regimen, new_regimen, type } = insulin_change;
-	let delta: number = temporal_user_status.delta;
-	delta = (delta * 100).toFixed(0) + '% ' + (delta > 0 ? '↑' : '↓');
+	let reactive_data = getContext('bm_data');
+	let recommendation = $derived(insulin_analyser.recommendation(reactive_data.value));
+	const { insulin_change, temporal_user_status, current_user_status, app_status } =
+		$derived(recommendation);
+	let { old_regimen, new_regimen, type } = $derived(insulin_change);
+	let delta: string = $derived.by(() => {
+		let delta = temporal_user_status.delta;
+		delta = (delta * 100).toFixed(0) + '% ' + (delta > 0 ? '↑' : '↓');
+		return delta;
+	});
 </script>
 
 <div class="space-y-4">
@@ -96,8 +98,7 @@
 		<Dialog.Content class="p-4 sm:max-w-[425px]">
 			<Dialog.Header>
 				<Dialog.Title>Your Sugar Control</Dialog.Title>
-				<Dialog.Description>
-				</Dialog.Description>
+				<Dialog.Description></Dialog.Description>
 			</Dialog.Header>
 			<div>
 				<p>Improving - Your efforts with diet, exercise, and medication are working.</p>
