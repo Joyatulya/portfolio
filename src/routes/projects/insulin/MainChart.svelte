@@ -9,25 +9,34 @@
 	// let {insulin_analyser} = getContext('user');
 	let { all } = $derived(InsulinAnalysis.calculate_averages(bm_data.value));
 	console.warn('DEBUGPRINT[74]: MainChart.svelte:10: all=', all.fasting);
+	const dtf = new Intl.DateTimeFormat('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+
+	function toolTipFormatters(param, ticket, cb) {
+		console.log(param);
+	}
 
 	let option: EChartsOption = $derived.by(() => {
 		let option = {
 			xAxis: {
 				type: 'category',
-				data: all.all.readings.map((x) => x.date.getDate())
+				data: all.all.readings.map((x) => dtf.format(x.date))
 			},
 			yAxis: {
 				type: 'value'
 			},
-			tooltip: {
-				trigger: 'axis',
-				axisPointer: {
-					type: 'cross',
-					label: {
-						backgroundColor: '#6a7985'
+			tooltip: [
+				{
+					trigger: 'axis',
+					// formatter: toolTipFormatters,
+					axisPointer: {
+						type: 'cross',
+						snap: true,
+						label: {
+							backgroundColor: '#6a7985'
+						}
 					}
 				}
-			},
+			],
 			series: [
 				// {
 				// 	name: 'Fasting',
