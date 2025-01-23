@@ -27,9 +27,11 @@
 			tooltip: [
 				{
 					trigger: 'axis',
+					position: 'bottom',
 					// formatter: toolTipFormatters,
 					axisPointer: {
-						type: 'cross',
+						type: 'line',
+						axis: 'x',
 						snap: true,
 						label: {
 							backgroundColor: '#6a7985'
