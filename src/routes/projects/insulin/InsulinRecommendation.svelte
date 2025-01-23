@@ -2,9 +2,9 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Info } from 'lucide-svelte';
 	import { getContext } from 'svelte';
-	import type { IPATIENT, PARSED_BM } from './insulinAnalysis';
+	import type { IPATIENT, PARSED_BM } from './insulinAnalysis.types';
 	import InsulinChangeReason from './components/InsulinChangeReason.svelte';
-	const { insulin_analyser } = getContext<IPATIENT>('user');
+	const { insulin_analyser, insulinRegimen } = getContext<IPATIENT>('user');
 	let reactive_data = getContext('bm_data');
 	let recommendation = $derived(insulin_analyser.recommendation(reactive_data.value));
 	const { insulin_change, temporal_user_status, current_user_status, app_status } =
@@ -38,7 +38,11 @@
 			{insulin_change.type === 'add' ? 'Increase' : 'Decrease'} Insulin Dose
 		</p>
 	</div>
-	{@render BasalRegimen()}
+	{#if insulinRegimen.type === 'basal'}
+		{@render BasalRegimen()}
+	{:else}
+		{@render NPH_BD()}
+	{/if}
 </div>
 <InsulinChangeReason {recommendation} />
 <!---->
@@ -52,6 +56,31 @@
 		<div>
 			<p>New Insulin Dose</p>
 			<p class="text-2xl font-semibold">{new_regimen.basal_dose}</p>
+		</div>
+	</div>
+{/snippet}
+
+{#snippet NPH_BD()}
+	<div class="*:justify-between">
+		<div class="flex">
+			<div>
+				<p class="">Old AM Insulin Dose</p>
+				<p class="text-2xl font-semibold">{old_regimen.basal_am_dose}</p>
+			</div>
+			<div>
+				<p>New Insulin Dose</p>
+				<p class="text-2xl font-semibold">{new_regimen.basal_am_dose}</p>
+			</div>
+		</div>
+		<div class="flex">
+			<div>
+				<p class="">Old PM Insulin Dose</p>
+				<p class="text-2xl font-semibold">{old_regimen.basal_pm_dose}</p>
+			</div>
+			<div>
+				<p>New Insulin Dose</p>
+				<p class="text-2xl font-semibold">{new_regimen.basal_pm_dose}</p>
+			</div>
 		</div>
 	</div>
 {/snippet}

@@ -80,6 +80,38 @@ const normalBM: BM[] = [
 	get_dummy_date(0, 140, 'pre_dinner'),
 ]
 
+const really_bad_hyper_bm: BM[] = [
+
+	get_dummy_date(6, 278, 'fasting'),
+	get_dummy_date(6, 350, 'pre_lunch'),
+	get_dummy_date(6, 410, 'pre_dinner'),
+
+	get_dummy_date(5, 378, 'fasting'),
+	get_dummy_date(5, 450, 'pre_lunch'),
+	get_dummy_date(5, 510, 'pre_dinner'),
+
+	get_dummy_date(4, 378, 'fasting'),
+	get_dummy_date(4, 450, 'pre_lunch'),
+	get_dummy_date(4, 510, 'pre_dinner'),
+
+	get_dummy_date(3, 378, 'fasting'),
+	get_dummy_date(3, 450, 'pre_lunch'),
+	get_dummy_date(3, 510, 'pre_dinner'),
+
+	get_dummy_date(2, 365, 'fasting'),
+	get_dummy_date(2, 500, 'pre_lunch'),
+	get_dummy_date(2, 510, 'pre_dinner'),
+
+	get_dummy_date(1, 395, 'fasting'),
+	get_dummy_date(1, 550, 'pre_lunch'),
+	get_dummy_date(1, 400, 'pre_dinner'),
+
+	get_dummy_date(0, 350, 'fasting'),
+	get_dummy_date(0, 460, 'pre_lunch'),
+	get_dummy_date(0, 410, 'pre_dinner'),
+]
+
+
 const hyper_bm: BM[] = [
 
 	get_dummy_date(6, 178, 'fasting'),
@@ -148,7 +180,8 @@ export const dataSets = {
 	'Hyperglycaemia': hyper_bm,
 	'Hypoglycaemia': hypo_bm,
 	'Improving Hypoglycaemia': improvingHypoglycaemia,
-	'Normal': normalBM
+	'Normal': normalBM,
+	'Severe Hyperglyceamia' : really_bad_hyper_bm
 }
 
 export const dummyBM = random_array_element(Object.values(dataSets))

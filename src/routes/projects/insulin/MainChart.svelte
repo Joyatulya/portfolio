@@ -2,20 +2,36 @@
 	import { mountEchart } from '$lib/utils/chartUtils.svelte.ts';
 	import type { EChartsOption } from 'echarts';
 	import { movingAverage } from '$lib/utils/dataUtils';
-	import type { PARSED_BM } from './insulinAnalysis';
+	import { InsulinAnalysis, type PARSED_BM } from './insulinAnalysis';
 	import { getContext } from 'svelte';
 
 	let bm_data = getContext<{ value: PARSED_BM[] }>('bm_data');
+	// let {insulin_analyser} = getContext('user');
+	let { all } = $derived(InsulinAnalysis.calculate_averages(bm_data.value));
+	console.warn('DEBUGPRINT[74]: MainChart.svelte:10: all=', all.fasting);
+
 	let option: EChartsOption = $derived.by(() => {
 		let option = {
 			xAxis: {
 				type: 'category',
-				data: bm_data.value.map((x) => x.date.getDate())
+				data: all.fasting.readings.map((x) => x.date.getDate())
 			},
 			yAxis: {
 				type: 'value'
 			},
 			series: [
+				{
+					name: 'Fasting',
+					data: all.fasting.readings.map((x) => x.value),
+					type: 'line',
+					smooth: true
+				},
+				{
+					name: 'Pre Dinner',
+					data: all.pre_dinner.readings.map((x) => x.value),
+					type: 'line',
+					smooth: true
+				},
 				{
 					name: 'Average',
 					data: movingAverage(
