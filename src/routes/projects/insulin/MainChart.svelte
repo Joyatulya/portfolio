@@ -14,33 +14,42 @@
 		let option = {
 			xAxis: {
 				type: 'category',
-				data: all.fasting.readings.map((x) => x.date.getDate())
+				data: all.all.readings.map((x) => x.date.getDate())
 			},
 			yAxis: {
 				type: 'value'
 			},
+			tooltip: {
+				trigger: 'axis',
+				axisPointer: {
+					type: 'cross',
+					label: {
+						backgroundColor: '#6a7985'
+					}
+				}
+			},
 			series: [
-				{
-					name: 'Fasting',
-					data: all.fasting.readings.map((x) => x.value),
-					type: 'line',
-					smooth: true
-				},
-				{
-					name: 'Pre Dinner',
-					data: all.pre_dinner.readings.map((x) => x.value),
-					type: 'line',
-					smooth: true
-				},
-				{
-					name: 'Average',
-					data: movingAverage(
-						bm_data.value.map((x) => x.value),
-						3
-					),
-					type: 'line',
-					smooth: true
-				},
+				// {
+				// 	name: 'Fasting',
+				// 	data: all.fasting.readings.map((x) => x.value),
+				// 	type: 'line',
+				// 	smooth: true
+				// },
+				// {
+				// 	name: 'Pre Dinner',
+				// 	data: all.pre_dinner.readings.map((x) => x.value),
+				// 	type: 'line',
+				// 	smooth: true
+				// },
+				// {
+				// 	name: 'Average',
+				// 	data: movingAverage(
+				// 		bm_data.value.map((x) => x.value),
+				// 		3
+				// 	),
+				// 	type: 'line',
+				// 	smooth: true
+				// },
 				{
 					name: 'Sugar Levels',
 					data: bm_data.value.map((x) => x.value),
