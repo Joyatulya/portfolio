@@ -11,6 +11,8 @@ so that we can make more informed decisions for you.
 	import MainChart from './MainChart.svelte';
 	import TrendsStatistics from './components/TrendsStatistics.svelte';
 	import DataSelector from './components/DataSelector.svelte';
+	import ReadingEntry from './components/ReadingEntry.svelte';
+	import Gauge from './components/Gauge.svelte';
 
 	let { data } = $props();
 	let { data: bm_data } = data;
@@ -23,7 +25,7 @@ so that we can make more informed decisions for you.
 	<DataSelector />
 	<MainChart />
 	<!-- <InsulinInformation /> -->
-	<TrendsStatistics />
+	<!-- <TrendsStatistics /> -->
 	<InsulinRecommendation />
-	<!-- <ReadingEntry /> -->
+	<ReadingEntry />
 </main>

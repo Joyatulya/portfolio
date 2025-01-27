@@ -8,7 +8,6 @@
 	let bm_data = getContext<{ value: PARSED_BM[] }>('bm_data');
 	// let {insulin_analyser} = getContext('user');
 	let { all } = $derived(InsulinAnalysis.calculate_averages(bm_data.value));
-	console.warn('DEBUGPRINT[74]: MainChart.svelte:10: all=', all.fasting);
 	const dtf = new Intl.DateTimeFormat('en-IN', { dateStyle: 'short', timeStyle: 'short' });
 
 	function toolTipFormatters(param, ticket, cb) {

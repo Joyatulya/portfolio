@@ -18,15 +18,15 @@ Features
     There can be a monitoring phase in which it has made a change & now is just observing. It will just see how your sugar is. It can then switch to a reccomendation phase in which it believes that you should make a change to your regimen because you are not meeting targets. It can then maintaience phase(could be named better), in which you are in targets & maintaining that. You should continue on the same regimen.
   */
 
-import { App_Status, ComparisonOutcome, Current_User_Status, enumBMType, Temporal_User_Status, type BM, type InsulinChange, type IPATIENT, type IRAW_PATIENT, type PARSED_BM, type TBasalInsulin, type Tbm_aggergation, type TMealAggregation, type TNPH_BD_Insulin, type TRecommendation, type TTopAggregation } from "./insulinAnalysis.types";
+import { App_Status, ComparisonOutcome, Current_User_Status, enumBMType, Temporal_User_Status, type BM, type InsulinChange, type IPATIENT, type IRAW_PATIENT, type PARSED_BM, type TAdjustment_Table, type TBasal_Bolus_Regimen, type TBasalInsulin, type Tbm_aggergation, type TMealAggregation, type TNPH_BD_Insulin, type TRecommendation, type TTopAggregation } from "./insulinAnalysis.types";
 
 
 
 
 // Helper Functions
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-const groupBy = function (xs: any[], key: string) {
-  return xs.reduce(function (rv, x) {
+const groupBy = function(xs: any[], key: string) {
+  return xs.reduce(function(rv, x) {
     (rv[x[key]] = rv[x[key]] || []).push(x);
     return rv;
   }, {});
@@ -185,7 +185,7 @@ export class Basal_Regimen extends InsulinAnalysis {
     this.PATIENT = patient
   }
 
-  temporal_sugar_status(data: TTopAggregation) {
+  temporal_sugar_status(data: TTopAggregation): { current_status: Current_User_Status; temporal_status: Temporal_User_Status; delta: number; } {
     const { until_start_day, start_day_to_end_day } = data
     const { all: { mean: recent_all_mean }, fasting: { mean: recent_fasting_mean } } = until_start_day
     const { all: { mean: penultimate_all_mean, readings: penultimate_all_readings }, fasting: { mean: penultimate_fasting_mean } } = start_day_to_end_day
@@ -286,7 +286,6 @@ export class Basal_Regimen extends InsulinAnalysis {
     // Being extra careful & playing it safe from hypoglycaemia perspective
     new_insulin_dose = Math.floor(new_insulin_dose + insulin_dose_change)
     insulin_change.new_regimen.basal_dose = new_insulin_dose
-    console.warn("DEBUGPRINT[62]: insulinAnalysis.ts:306: insulin_change=", insulin_change)
 
     return { app_status, current_user_status: user_status.current_status, temporal_user_status: { status: user_status.temporal_status, delta: user_status.delta }, insulin_change }
     // return { previous_insulin_dose: this.basal_dose, insulin_dose_change, new_insulin_dose }
@@ -295,7 +294,6 @@ export class Basal_Regimen extends InsulinAnalysis {
 
 export class Basal_Bolus_Regimen extends InsulinAnalysis {
 
-  patient_insulin_dose: TBasal_Bolus_Regimen
   PRE_MEAL_BM_RANGE = [100, 119]
 
   static mealInsulinAdjustmentTable: TAdjustment_Table = [
@@ -303,6 +301,7 @@ export class Basal_Bolus_Regimen extends InsulinAnalysis {
     { min: 160, max: 179, adjustment: 2 },
     { min: 140, max: 159, adjustment: 2 },
     { min: 120, max: 139, adjustment: 1 },
+    { min: 100, max: 119, adjustment: 0 },
     { min: 80, max: 99, adjustment: -1 },
     { min: 60, max: 79, adjustment: -2 },
     { min: -Infinity, max: 59, adjustment: -4 }, // less than 60
@@ -321,7 +320,6 @@ export class Basal_Bolus_Regimen extends InsulinAnalysis {
 
   constructor(patient: IRAW_PATIENT) {
     super(patient)
-    this.patient_insulin_dose = patient_insulin_dose
   }
 
   static calc_insulin_adjustment(mean: number, type: 'FASTING' | 'MEAL') {
@@ -329,23 +327,47 @@ export class Basal_Bolus_Regimen extends InsulinAnalysis {
     return table.filter(x => between(mean, x.min, x.max))[0].adjustment
   }
 
-  recommendation(data: PARSED_BM[]) {
-    const { night, pre_dinner, pre_lunch, fasting } = this.calculate_averages(data, 3)
-    const insulin_adjustments: TBasal_Bolus_Regimen = { breakfast: 0, lunch: 0, dinner: 0, basal: 0 }
-    if (!between(night.mean_bm, ...this.PRE_MEAL_BM_RANGE)) {
-      insulin_adjustments.dinner = Basal_Bolus_Regimen.calc_insulin_adjustment(night.mean_bm, 'MEAL')
-    }
-    if (!between(pre_lunch.mean_bm, ...this.PRE_MEAL_BM_RANGE)) {
-      insulin_adjustments.breakfast = Basal_Bolus_Regimen.calc_insulin_adjustment(pre_lunch.mean_bm, 'MEAL')
-    }
-    if (!between(pre_dinner.mean_bm, ...this.PRE_MEAL_BM_RANGE)) {
-      insulin_adjustments.lunch = Basal_Bolus_Regimen.calc_insulin_adjustment(pre_dinner.mean_bm, 'MEAL')
-    }
-    if (!between(fasting.mean_bm, ...this.PRE_MEAL_BM_RANGE)) {
-      insulin_adjustments.basal = Basal_Bolus_Regimen.calc_insulin_adjustment(fasting.mean_bm, 'FASTING')
-    }
-    console.log(insulin_adjustments)
-    return insulin_adjustments
+  insulin_adjustment(aggregateData: TTopAggregation): InsulinChange<TBasal_Bolus_Regimen> {
+    const { start_day_to_end_day: recent } = aggregateData
+    const old_regimen = this.PATIENT.insulinRegimen
+    const new_regimen = { ...old_regimen }
+
+    new_regimen.bolus_dinner_dose += Basal_Bolus_Regimen.calc_insulin_adjustment(recent.night.mean, 'MEAL')
+    new_regimen.bolus_lunch_dose += Basal_Bolus_Regimen.calc_insulin_adjustment(recent.pre_dinner.mean, 'MEAL')
+    new_regimen.bolus_night_dose += Basal_Bolus_Regimen.calc_insulin_adjustment(recent.pre_lunch.mean, 'MEAL')
+    new_regimen.basal_dose += Basal_Bolus_Regimen.calc_insulin_adjustment(recent.fasting.mean, 'FASTING')
+
+    //FIX: Needs to be fixed later
+    return { new_regimen, old_regimen, type: 'subtract' }
+  }
+
+  temporal_sugar_status(data: TTopAggregation) {
+    const { start_day_to_end_day: recent, until_start_day: penultimate } = data
+    const pre_meal_readings = recent.all.readings.filter(v => v.type !== 'fasting')
+    const pre_meal_mean = pre_meal_readings.reduce((a, b) => a + b.value, 0) / pre_meal_readings.length
+    const meal_adjustment = Basal_Bolus_Regimen.calc_insulin_adjustment(pre_meal_mean, 'MEAL')
+    const fasting_adjustment = Basal_Bolus_Regimen.calc_insulin_adjustment(recent.fasting.mean, 'FASTING')
+    let current_user_status = Current_User_Status.IN_RANGE
+    let temporal_status = Temporal_User_Status.MAINTAINING
+    let delta = 0
+    if (meal_adjustment > 0 && fasting_adjustment > 0) current_user_status = Current_User_Status.HYPER
+    if (meal_adjustment < 0 && fasting_adjustment < 0) current_user_status = Current_User_Status.HYPO
+    return { current_user_status, temporal_user_status: { status: temporal_status, delta } }
+  }
+
+  calc_app_status(insulin_change: InsulinChange<TBasal_Bolus_Regimen>): App_Status {
+    const { old_regimen, new_regimen } = insulin_change
+    const app_making_any_change = Object.keys(new_regimen).some(k => new_regimen[k] !== old_regimen[k])
+    return app_making_any_change ? App_Status.RECOMMENDATION : App_Status.MAINTEANACE
+  }
+
+  recommendation(data: PARSED_BM[]): TRecommendation {
+    const aggregateData = InsulinAnalysis.calculate_averages(data)
+    const insulin_change = this.insulin_adjustment(aggregateData)
+    const { all, until_start_day, start_day_to_end_day: recent } = aggregateData
+    const app_status = this.calc_app_status(insulin_change)
+    const temporal_sugar_status = this.temporal_sugar_status(aggregateData)
+    return { app_status, insulin_change, ...temporal_sugar_status }
   }
 
   correctional_insulin_dose(pre_meal_bm: number): number {

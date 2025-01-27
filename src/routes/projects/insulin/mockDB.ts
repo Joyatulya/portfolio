@@ -148,31 +148,38 @@ const hypo_bm: BM[] = [
 	get_dummy_date(6, 178, 'fasting'),
 	get_dummy_date(6, 250, 'pre_lunch'),
 	get_dummy_date(6, 310, 'pre_dinner'),
+	get_dummy_date(6, 110, 'night'),
 
 	get_dummy_date(5, 178, 'fasting'),
 	get_dummy_date(5, 250, 'pre_lunch'),
 	get_dummy_date(5, 310, 'pre_dinner'),
+	get_dummy_date(5, 110, 'night'),
 
 	get_dummy_date(4, 178, 'fasting'),
 	get_dummy_date(4, 250, 'pre_lunch'),
 	get_dummy_date(4, 310, 'pre_dinner'),
+	get_dummy_date(4, 110, 'night'),
 
 
 	get_dummy_date(3, 85, 'fasting'),
 	get_dummy_date(3, 200, 'pre_lunch'),
 	get_dummy_date(3, 110, 'pre_dinner'),
+	get_dummy_date(3, 110, 'night'),
 
 	get_dummy_date(2, 65, 'fasting'),
 	get_dummy_date(2, 150, 'pre_lunch'),
 	get_dummy_date(2, 110, 'pre_dinner'),
+	get_dummy_date(2, 110, 'night'),
 
 	get_dummy_date(1, 65, 'fasting'),
 	get_dummy_date(1, 150, 'pre_lunch'),
 	get_dummy_date(1, 110, 'pre_dinner'),
+	get_dummy_date(1, 110, 'night'),
 
 	get_dummy_date(0, 65, 'fasting'),
 	get_dummy_date(0, 160, 'pre_lunch'),
 	get_dummy_date(0, 110, 'pre_dinner'),
+	get_dummy_date(0, 110, 'night'),
 ]
 
 // export const dummyBM = faker.helpers.arrayElements([hyper_bm, hypo_bm])
@@ -181,7 +188,8 @@ export const dataSets = {
 	'Hypoglycaemia': hypo_bm,
 	'Improving Hypoglycaemia': improvingHypoglycaemia,
 	'Normal': normalBM,
-	'Severe Hyperglyceamia' : really_bad_hyper_bm
+	'Severe Hyperglyceamia': really_bad_hyper_bm
 }
+
 
 export const dummyBM = random_array_element(Object.values(dataSets))

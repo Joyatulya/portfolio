@@ -4,6 +4,7 @@
 	import { getContext } from 'svelte';
 	import type { IPATIENT, PARSED_BM } from './insulinAnalysis.types';
 	import InsulinChangeReason from './components/InsulinChangeReason.svelte';
+	import Gauge from './components/Gauge.svelte';
 	const { insulin_analyser, insulinRegimen } = getContext<IPATIENT>('user');
 	let reactive_data = getContext('bm_data');
 	let recommendation = $derived(insulin_analyser.recommendation(reactive_data.value));
@@ -23,6 +24,7 @@
 		<p class="text-3xl font-semibold">
 			{current_user_status}
 		</p>
+		<!-- <Gauge label = 'Avg. Sugar' value = {current_user_status} /> -->
 	</div>
 	<div>
 		<p>Recent Sugar Control</p>
@@ -40,8 +42,10 @@
 	</div>
 	{#if insulinRegimen.type === 'basal'}
 		{@render BasalRegimen()}
-	{:else}
+	{:else if insulinRegimen.type === 'nph_bd'}
 		{@render NPH_BD()}
+	{:else }
+		{@render Basal_Bolus()}
 	{/if}
 </div>
 <InsulinChangeReason {recommendation} />
@@ -80,6 +84,51 @@
 			<div>
 				<p>New Insulin Dose</p>
 				<p class="text-2xl font-semibold">{new_regimen.basal_pm_dose}</p>
+			</div>
+		</div>
+	</div>
+{/snippet}
+
+{#snippet Basal_Bolus()}
+	<div class="*:justify-between">
+		<div class="flex">
+			<div>
+				<p class="">Old Long Acting Insulin</p>
+				<p class="text-2xl font-semibold">{old_regimen.basal_dose}</p>
+			</div>
+			<div>
+				<p>New Long Acting Insulin</p>
+				<p class="text-2xl font-semibold">{new_regimen.basal_dose}</p>
+			</div>
+		</div>
+		<div class="flex">
+			<div>
+				<p class="">Old Lunch Dose</p>
+				<p class="text-2xl font-semibold">{old_regimen.bolus_lunch_dose}</p>
+			</div>
+			<div>
+				<p>New Lunch Dose</p>
+				<p class="text-2xl font-semibold">{new_regimen.bolus_lunch_dose}</p>
+			</div>
+		</div>
+		<div class="flex">
+			<div>
+				<p class="">Old Dinner Dose</p>
+				<p class="text-2xl font-semibold">{old_regimen.bolus_dinner_dose}</p>
+			</div>
+			<div>
+				<p>New Dinner Dose</p>
+				<p class="text-2xl font-semibold">{new_regimen.bolus_dinner_dose}</p>
+			</div>
+		</div>
+		<div class="flex">
+			<div>
+				<p class="">Old Night Dose</p>
+				<p class="text-2xl font-semibold">{old_regimen.bolus_night_dose}</p>
+			</div>
+			<div>
+				<p>New Night Dose</p>
+				<p class="text-2xl font-semibold">{new_regimen.bolus_night_dose}</p>
 			</div>
 		</div>
 	</div>
