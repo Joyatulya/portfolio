@@ -49,6 +49,7 @@
 	"type": "module",
 	"dependencies": {
 		"echarts": "^5.6.0",
+		"json-rules-engine": "^7.3.0",
 		"tailwindcss": "^3.4.17",
 		"zod": "^3.24.1"
 	}
