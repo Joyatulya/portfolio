@@ -13,7 +13,7 @@
 
 import { type Rule } from "json-rules-engine";
 import { FEMALE_HB_RANGE, MALE_HB_RANGE, MCV_RANGE } from "../defaults";
-import { Severity } from "..";
+import { AnalysisLevel, Severity } from "..";
 const readline = require('readline')
 
 const conditionIsAnaemic = {
@@ -46,9 +46,9 @@ const conditionIsAnaemic = {
 }
 export const ruleIsAnaemic: Rule = {
   name: 'isAnaemic',
-  priority: 100,
+  priority: AnalysisLevel.LEVEL_1,
   conditions: conditionIsAnaemic,
-  event: { type: 'diagnosis', params: {hb : {fact : 'hb'}} },
+  event: { type: 'diagnosis' },
   onSuccess: async function (event, almanac) {
     console.warn("DEBUGPRINT[90]: fbc.ts:50: event=", event)
     almanac.addFact('isAnaemic', true)
@@ -77,7 +77,7 @@ const conditionIsMicrocyticAnaemia = {
 }
 export const ruleIsMicrocyticAnaemia: Rule = {
   name: 'isMicrocyticAnaemia',
-  priority: 95,
+  priority: AnalysisLevel.LEVEL_2,
   conditions: conditionIsMicrocyticAnaemia,
   event: { type: 'diagnosis' },
   onSuccess: async function (_, almanac) {
@@ -106,7 +106,7 @@ const conditionIsMacrocyticAnaemia = {
 
 export const ruleIsMacrocyticAnaemia: Rule = {
   name: 'isMacrocyticAnaemia',
-  priority: 95,
+  priority: AnalysisLevel.LEVEL_2,
   conditions: conditionIsMacrocyticAnaemia,
   event: { type: 'diagnosis' },
   onSuccess: async function (_, almanac) {

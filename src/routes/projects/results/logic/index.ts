@@ -7,6 +7,12 @@ export enum Severity {
   SEVERE = 'Severe'
 }
 
+export enum AnalysisLevel {
+  LEVEL_1 = 100, // single parameter
+  LEVEL_2 = 95, // Dual parameter
+  LEVEL_3 = 90 // More complex
+}
+
 const zUser = z.object({
   weight: z.coerce.number().min(0).max(500).default(60),
   age: z.coerce.number().min(0).max(120).default(50),
@@ -28,7 +34,7 @@ const zKFT = z.object({
   urea: z.coerce.number().positive().optional(),
 })
 
-
+export type AllTests = keyof typeof zFBC._type | keyof typeof zKFT._type
 /**
   * Could change this to builder pattern (returning self)
   */
