@@ -1,27 +1,53 @@
-import { Engine } from "json-rules-engine";
+import { Engine, Rule, type EngineResult } from "json-rules-engine";
+import { z } from "zod";
+
+export enum Severity {
+  MILD = 'Mild',
+  MODERATE = 'Moderate',
+  SEVERE = 'Severe'
+}
+
+const zUser = z.object({
+  weight: z.coerce.number().min(0).max(500).default(60),
+  age: z.coerce.number().min(0).max(120).default(50),
+  isMale: z.coerce.boolean().default(true)
+})
+
+const zFBC = z.object({
+  hb: z.coerce.number().min(0).max(250).optional(),
+  plt: z.coerce.number().min(0).max(10_00_000).optional(),
+  wbc: z.coerce.number().min(0).max(500).optional(),
+  neut: z.coerce.number().min(0).max(500).optional(),
+  mcv: z.coerce.number().min(50).max(150).optional(),
+})
+
+const zKFT = z.object({
+  na: z.coerce.number().positive().max(200).optional(),
+  k: z.coerce.number().positive().max(11).optional(),
+  creat: z.coerce.number().positive().optional(),
+  urea: z.coerce.number().positive().optional(),
+})
 
 
-export async function hello_world_rules_engine() {
-  const engine = new Engine()
+/**
+  * Could change this to builder pattern (returning self)
+  */
 
-  engine.addRule({
-    conditions: {
-      any: [{
-        fact: 'weight',
-        operator: 'greaterThan',
-        value: 60
-      }]
-    },
-    event: {
-      type: 'message',
-      params: {
-        data: 'You are Fat!'
-      }
+class Plan {
+
+  rules: Rule[] = []
+  engine = new Engine()
+  result?: EngineResult
+
+  addRule(rule: Rule | Rule[]) {
+    if (Array.isArray(rule)) {
+      this.rules.concat(rule)
+    } else {
+      this.rules.push(rule)
     }
-  })
-  const facts = { weight: 70 }
+  }
 
-  const { events } = await engine.run(facts)
-
-  console.log(events)
+  async run() {
+    this.result = await this.engine.run(this.rules)
+  }
 }
