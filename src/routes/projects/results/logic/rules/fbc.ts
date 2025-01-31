@@ -7,12 +7,12 @@
  *  - wbc
  *  - neut
  *  - other cells
- *  - mcv
+ *  - mcv
  *
  */
 
-import { type Rule } from "json-rules-engine";
-import { FEMALE_HB_RANGE, MALE_HB_RANGE, MCV_RANGE } from "../defaults";
+import { Operator, type Rule } from "json-rules-engine";
+import { FEMALE_HB_RANGE, MALE_HB_RANGE, MCV_RANGE, PLT_RANGE } from "../defaults";
 import { AnalysisLevel, Severity } from "..";
 const readline = require('readline')
 
@@ -44,11 +44,12 @@ const conditionIsAnaemic = {
   }
   ]
 }
+
 export const ruleIsAnaemic: Rule = {
   name: 'isAnaemic',
   priority: AnalysisLevel.LEVEL_1,
   conditions: conditionIsAnaemic,
-  event: { type: 'diagnosis' },
+  event: { type: 'diagnosis', params: { hb: { fact: 'hb' } } },
   onSuccess: async function (event, almanac) {
     console.warn("DEBUGPRINT[90]: fbc.ts:50: event=", event)
     almanac.addFact('isAnaemic', true)
@@ -59,6 +60,26 @@ export const ruleIsAnaemic: Rule = {
     almanac.addFact('isAnaemic', false)
   }
 }
+
+
+const conditonPlateletsInRange = {
+  name: 'isPlatletsInRange',
+  all: [{
+    fact: 'plt',
+    operator: 'inRange',
+    value: PLT_RANGE
+  }]
+}
+export const ruleIsPlatletsInRange: Rule = {
+  name: 'isPlatletsInRange',
+  priority: AnalysisLevel.LEVEL_1,
+  conditions: conditonPlateletsInRange,
+  event: { type: 'diagnosis' },
+  onSuccess: async function (_, almanac) {
+    console.log('platlets in range')
+  }
+}
+
 
 const conditionIsMicrocyticAnaemia = {
   name: 'Microcytic Anaemia',
@@ -124,4 +145,14 @@ function anaemiaSeverity(hb: number): Severity {
   if (hb < 80) return Severity.SEVERE
   if (hb < 100) return Severity.MODERATE
   return Severity.MILD
+}
+
+function inRangeConditionFactory(fact: string, range: [number, number]) {
+  return {
+    all: [{
+      fact,
+      range,
+      operator: 'inRange'
+    }]
+  }
 }

@@ -34,6 +34,17 @@
  * Essentially a kind of ternary thing, which can be used for our level 1
  * analysis.
  *
+ * Easiest way that comes to my mind is to ensure if value is within range or
+ * not. Based off of that, we can run the result function which can further
+ * segregate the stuff.
+ *
+ * I have to make sure I define & stick with what does a failure event mean &
+ * what does success event mean. No wrong answer here, what do I want. If I find
+ * an abnormality, or anything that needs to take further action, that will have
+ * a priority to go into the success event side of things. Don'h have to make
+ * the decision now, roam around, think about it, but make this decision so as
+ * to app remains more cohesive.
+ *
  * I could make an analysis outcome object which can tell us about each param.
  * Like {
  *    param : 'hb',
@@ -47,21 +58,52 @@
  * The level 2 list will be made through similar way but the next nodes will be
  * added through the onSuccess & onFailure functions.
  * Lets try a small example & see how it goes.
+ *
+ * ## Types of parameters
+ *
+ * Some paramters are of type range, both high & low matter and in others only
+ * one side of the equation matters.
+ *
+ * Range Params = hb, wbc, plt, neut, mcv, prot, glob, all electrolytes
+ * Single side params = bili, ast, alt, alp, ggt, alb, creat, urea
+ * 
  */
 
 import { Almanac, Engine, Rule } from "json-rules-engine"
 import type { AllTests } from ".."
 import { ruleIsAnaemic } from "../rules/fbc"
+import { z } from "zod"
 
-const dictionaryLevel1 : Record<AllTests, Rule> = {
-  hb: [ruleIsAnaemic, ruleIsPolycythaemic]
+const dictionaryLevel1: Record<AllTests, Rule> = {
+  // hb: [ruleIsAnaemic, ruleIsPolycythaemic]
 }
 
 export class InteractiveEngine {
   myAlmanac = new Almanac()
-  engine = new Engine()
+  //@ts-ignore
+  engine: Engine
 
-  run(){
+  constructor() {
+    this.engineSetup()
+  }
+
+  run() {
 
   }
+
+  engineSetup() {
+    this.engine = new Engine([], { replaceFactsInEventParams: true })
+    this.engine.addOperator('inRange', inRangeOperator)
+  }
+}
+
+function inRangeOperator(factValue: string, jsonValue: string) {
+  console.warn("DEBUGPRINT[93]: index.ts:91: jsonValue=", jsonValue)
+  // const zNum = z.coerce.number()
+  // FIX: Optimization can be made here
+  const range = JSON.parse(JSON.stringify(jsonValue))
+  if (!Array.isArray(range)) throw new Error(`${jsonValue}(range) is not an array`)
+  if (range.length !== 2) throw new Error(`${jsonValue}(range) is not a pair`)
+  const val = parseInt(factValue)
+  return range[0] < val && val < range[1]
 }
