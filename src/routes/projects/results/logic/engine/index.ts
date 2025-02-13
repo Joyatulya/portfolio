@@ -87,15 +87,24 @@ export class InteractiveEngine {
     this.engineSetup()
   }
 
-  run() {
-
+  async run(values) {
   }
 
   engineSetup() {
     this.engine = new Engine([], { replaceFactsInEventParams: true })
     this.engine.addOperator('inRange', inRangeOperator)
   }
+
+  addFact(key: string, fact: any) {
+    this.myAlmanac.addFact(key, fact)
+  }
+
+  getFact(key: string) {
+    return this.myAlmanac.factValue(key)
+  }
+
 }
+
 
 function inRangeOperator(factValue: string, jsonValue: string) {
   console.warn("DEBUGPRINT[93]: index.ts:91: jsonValue=", jsonValue)
