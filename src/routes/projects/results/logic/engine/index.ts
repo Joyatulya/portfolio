@@ -87,12 +87,16 @@ export class InteractiveEngine {
     this.engineSetup()
   }
 
-  async run(values) {
+  async run(values: Record<AllTests, boolean | number | string | undefined>) {
   }
 
   engineSetup() {
     this.engine = new Engine([], { replaceFactsInEventParams: true })
     this.engine.addOperator('inRange', inRangeOperator)
+    this.addFact('mainArray', [])
+    this.addFact('questionArray', [])
+    this.addFact('recommendationArray', [])
+    this.addFact('diagnosisArray', [])
   }
 
   addFact(key: string, fact: any) {
@@ -101,6 +105,10 @@ export class InteractiveEngine {
 
   getFact(key: string) {
     return this.myAlmanac.factValue(key)
+  }
+
+  get mainArray() {
+    return this.getFact('mainArray')
   }
 
 }
