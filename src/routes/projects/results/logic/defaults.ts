@@ -7,12 +7,21 @@
 
 type Range = [number, number]
 
-export const DEFAULT_WEIGHT = 60
-export const DEFAULT_HEIGHT = 160
-export const DEFAULT_AGE = 50
 
-export const MALE_HB_RANGE: Range = [12.4, 1634]
-export const FEMALE_HB_RANGE: Range = [11, 15.1]
-export const MCV_RANGE: Range = [80, 100]
-export const PLT_RANGE: Range = [1_50_000, 4_00_000]
-export const WBC_RANGE: Range = [4, 10]
+export const DEFAULTS: Record<string, Range> = {
+  MALE_HB_RANGE: [13.5, 17.5], // g/dL
+  FEMALE_HB_RANGE: [12.0, 15.5], // g/dL
+  WBC_RANGE: [4.0, 11.0], // x 10^9/L
+  NEUTROPHIL_RANGE: [2.0, 7.5], // x 10^9/L
+  LYMPHOCYTE_RANGE: [1.0, 4.0], // x 10^9/L
+  PLATELET_RANGE: [150, 450], // x 10^9/L
+  RBC_RANGE_MALE: [4.5, 5.5], // x 10^12/L
+  RBC_RANGE_FEMALE: [4.0, 5.0], // x 10^12/L
+  MCV_RANGE: [80, 100], // fL
+  MCH_RANGE: [27, 33], // pg
+  RDW_RANGE: [11.5, 14.5], // %
+
+  //KFT
+  MALE_CREATININE_RANGE: [0.7, 1.2], // g/dL
+  FEMALE_CREATININE_RANGE: [0.5, 1], // g/dL
+} as const

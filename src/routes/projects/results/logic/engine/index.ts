@@ -69,58 +69,95 @@
  * 
  */
 
-import { Almanac, Engine, Rule } from "json-rules-engine"
-import type { AllTests } from ".."
-import { ruleIsAnaemic } from "../rules/fbc"
-import { z } from "zod"
+import { Almanac, Engine, Rule, type EngineResult, } from "json-rules-engine"
+import { hb } from "../rules/fbc/hb"
+import { z, ZodSchema } from "zod"
+import { operators } from "../operator";
+import { zInferenceValues, type InferenceValues } from "../types";
+import { levelOneRules } from "../rules";
 
-const dictionaryLevel1: Record<AllTests, Rule> = {
-  // hb: [ruleIsAnaemic, ruleIsPolycythaemic]
-}
 
 export class InteractiveEngine {
-  myAlmanac = new Almanac()
-  //@ts-ignore
-  engine: Engine
+  private engine: Engine
+  private almanac: Almanac = new Almanac();
 
   constructor() {
-    this.engineSetup()
+    this.engineSetup();
   }
 
-  async run(values: Record<AllTests, boolean | number | string | undefined>) {
-  }
-
-  engineSetup() {
-    this.engine = new Engine([], { replaceFactsInEventParams: true })
-    this.engine.addOperator('inRange', inRangeOperator)
+  private engineSetup() {
+    this.engine = new Engine([], { replaceFactsInEventParams: true });
+    this.engine.addOperator("inRange", operators.inRangeOperator);
     this.addFact('mainArray', [])
-    this.addFact('questionArray', [])
-    this.addFact('recommendationArray', [])
-    this.addFact('diagnosisArray', [])
   }
 
-  addFact(key: string, fact: any) {
-    this.myAlmanac.addFact(key, fact)
+  public async initialize(values: unknown): Promise<void> { // Using unknown and validating
+    const { success, data: validatedValues, error } = this.validateValues(values);
+    if (!success) {
+      // console.warn("Error parsing init values =", error);
+      throw new Error("Invalid input values"); // Or handle differently
+    }
+
+    // Add validated values as facts
+    for (const key in validatedValues) {
+      if (validatedValues.hasOwnProperty(key)) {
+        this.almanac.addFact(key, validatedValues[key]);
+      }
+    }
+
+    // Dynamically add rules based on provided values
+    const rulesToAdd = this.getRulesForInput(validatedValues);
+    rulesToAdd.forEach(rule => this.engine.addRule(rule));
   }
 
-  getFact(key: string) {
-    return this.myAlmanac.factValue(key)
+  async run() {
+
+    let result: EngineResult
+    let i = 0
+    while (true) {
+      result = await this.engine.run(undefined, { almanac: this.almanac })
+      let newRules: Rule[] = await this.almanac.factValue('mainArray')
+
+      console.warn("DEBUGPRINT[22]: index.ts:126: newRules=", newRules)
+      if (newRules.length < 1) break
+
+      this.engineSetup()
+      newRules.forEach(rule => {
+        this.engine.addRule(rule)
+      });
+
+      i++
+    }
+    console.warn("DEBUGPRINT[23]: index.ts:134: result=", result)
+    return result
+  }
+
+  private getRulesForInput(values: InferenceValues): Rule[] {
+    let arr: Rule[] = []
+    Object.keys(values).forEach(test => {
+      const rules = levelOneRules[test] as Rule[] | undefined
+      if (rules) arr = [...arr, ...rules]
+    })
+    return arr
+  }
+
+
+  public addFact(key: string, fact: any): void {
+    this.almanac.addFact(key, fact);
+  }
+
+  public async getFact(key: string): Promise<any> {
+    return this.almanac.factValue(key);
+  }
+
+  private validateValues(values: unknown) {
+    return zInferenceValues.safeParse(values);
   }
 
   get mainArray() {
     return this.getFact('mainArray')
   }
 
-}
-
-
-function inRangeOperator(factValue: string, jsonValue: string) {
-  console.warn("DEBUGPRINT[93]: index.ts:91: jsonValue=", jsonValue)
-  // const zNum = z.coerce.number()
-  // FIX: Optimization can be made here
-  const range = JSON.parse(JSON.stringify(jsonValue))
-  if (!Array.isArray(range)) throw new Error(`${jsonValue}(range) is not an array`)
-  if (range.length !== 2) throw new Error(`${jsonValue}(range) is not a pair`)
-  const val = parseInt(factValue)
-  return range[0] < val && val < range[1]
+  async interrogateAlmanac() {
+  }
 }
