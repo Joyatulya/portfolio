@@ -85,6 +85,7 @@ const ruleIsAnaemic: Rule = {
   event: { type: 'diagnosis', params: { hb: { fact: 'hb' } } },
   onSuccess: async function (event, almanac) {
     console.log('anaemic')
+    // Can try & ask question here
     const mainArray = await almanac.factValue('mainArray')
     almanac.addFact('mainArray', [...mainArray, ruleIsMcvNormal])
   },
