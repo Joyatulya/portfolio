@@ -4,11 +4,18 @@ import { AnalysisLevel } from "../../engine.types"
 
 const conditionIsMcvNormal = {
   name: 'Normal MCV',
-  all: [{
-    fact: 'mcv',
-    operator: 'inRange',
-    value: DEFAULTS.MCV_RANGE
-  }],
+  all: [
+    {
+      fact: 'mcv',
+      operator: 'inRange',
+      value: DEFAULTS.MCV_RANGE
+    },
+    // {
+    //   fact: 'mcv',
+    //   operator: 'notEqual',
+    //   value: null
+    // },
+  ],
 }
 
 const conditionIsMicrocytic = {

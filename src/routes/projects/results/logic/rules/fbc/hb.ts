@@ -71,8 +71,9 @@ export const ruleIsHbNormal: Rule = {
     console.log('normal hb')
   },
   onFailure: async function (event, almanac: Almanac) {
-    const mainArray = await almanac.factValue('mainArray')
-    almanac.addFact('mainArray', [...mainArray, ruleIsAnaemic])
+    const mainArray = await almanac.factValue('mainArray') as Rule[]
+    mainArray.push(ruleIsHbNormal)
+    almanac.addFact('mainArray', mainArray)
     console.log('abnormal hb')
   }
 }
@@ -87,7 +88,8 @@ const ruleIsAnaemic: Rule = {
     console.log('anaemic')
     // Can try & ask question here
     const mainArray = await almanac.factValue('mainArray')
-    almanac.addFact('mainArray', [...mainArray, ruleIsMcvNormal])
+    mainArray.push(ruleIsMcvNormal)
+    almanac.addFact('mainArray', mainArray)
   },
   onFailure: async function (_, almanac) {
     console.log('polycythaemic')

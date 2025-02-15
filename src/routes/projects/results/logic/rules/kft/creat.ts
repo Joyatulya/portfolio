@@ -65,13 +65,14 @@ export const ruleIsCreatinineNormal: Rule = {
   priority: AnalysisLevel.LEVEL_1,
   conditions: conditionIsCreatinineNormal,
   event: { type: 'diagnosis', params: { creatinine: { fact: 'creatinine' } } },
-  onSuccess: async function (event, almanac) {
+  onSuccess: async function(event, almanac) {
     console.log('normal creatinine')
   },
-  onFailure: async function (event, almanac: Almanac) {
+  onFailure: async function(event, almanac: Almanac) {
     const mainArray = await almanac.factValue('mainArray')
     almanac.addFact('mainArray', [...mainArray, ruleIsCreatinineLow])
     console.log('abnormal creatinine')
+    debugger
   }
 }
 
@@ -81,12 +82,12 @@ const ruleIsCreatinineLow: Rule = {
   priority: AnalysisLevel.LEVEL_1,
   conditions: conditionIsCreatinineLow,
   event: { type: 'diagnosis', params: { creatinine: { fact: 'creatinine' } } },
-  onSuccess: async function (event, almanac) {
+  onSuccess: async function(event, almanac) {
     console.log('low creatinine')
     // const mainArray = await almanac.factValue('mainArray')
     // almanac.addFact('mainArray', [...mainArray, ])
   },
-  onFailure: async function (_, almanac) {
+  onFailure: async function(_, almanac) {
     console.log('high creatinine')
   }
 }

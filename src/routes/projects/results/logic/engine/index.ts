@@ -70,7 +70,6 @@
  */
 
 import { Almanac, Engine, Rule, type EngineResult, } from "json-rules-engine"
-import { hb } from "../rules/fbc/hb"
 import { z, ZodSchema } from "zod"
 import { operators } from "../operator";
 import { zInferenceValues, type InferenceValues } from "../types";
@@ -114,11 +113,12 @@ export class InteractiveEngine {
 
     let result: EngineResult
     let i = 0
+    debugger
     while (true) {
       result = await this.engine.run(undefined, { almanac: this.almanac })
       let newRules: Rule[] = await this.almanac.factValue('mainArray')
 
-      console.warn("DEBUGPRINT[22]: index.ts:126: newRules=", newRules)
+      console.warn("DEBUGPRINT[22]: index.ts:126: newRules=", newRules.map(x => x.name))
       if (newRules.length < 1) break
 
       this.engineSetup()
