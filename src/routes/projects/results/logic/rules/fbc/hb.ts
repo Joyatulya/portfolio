@@ -72,7 +72,7 @@ export const ruleIsHbNormal: Rule = {
   },
   onFailure: async function (event, almanac: Almanac) {
     const mainArray = await almanac.factValue('mainArray') as Rule[]
-    mainArray.push(ruleIsHbNormal)
+    mainArray.push(ruleIsAnaemic)
     almanac.addFact('mainArray', mainArray)
     console.log('abnormal hb')
   }

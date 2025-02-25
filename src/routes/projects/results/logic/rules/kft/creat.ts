@@ -72,7 +72,6 @@ export const ruleIsCreatinineNormal: Rule = {
     const mainArray = await almanac.factValue('mainArray')
     almanac.addFact('mainArray', [...mainArray, ruleIsCreatinineLow])
     console.log('abnormal creatinine')
-    debugger
   }
 }
 

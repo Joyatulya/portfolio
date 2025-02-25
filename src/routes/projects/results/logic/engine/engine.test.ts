@@ -32,11 +32,11 @@ describe("InteractiveEngine", () => {
     await engine.initialize({
       age: 20,
       isMale: true,
-      hb: 10.4,
+      hb: 10,
       // wbc: 40,
       // plt: 20,
-      // mcv: 60,
-      creatinine: 0.6
+      mcv: 60,
+      creatinine: 0.8
     })
 
     await engine.run()
